@@ -1,2 +1,5 @@
 .idea/
+bin/
 *.iml
+secrets.tfvars
+.terraform/

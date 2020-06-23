@@ -163,8 +163,6 @@ func (c *openWeatherClient) GetWeatherDBRecord(ctx context.Context) (*DBRecord, 
 		WindSpeed:     *w.Wind.Speed,
 		WindDirection: *w.Wind.Deg,
 		Clouds:        *w.Clouds.All,
-		Sunrise:       *w.GetSunrise(),
-		Sunset:        *w.GetSunset(),
 		Timestamp:     time.Now(),
 	}, nil
 }

@@ -16,9 +16,13 @@ type (
 		WindSpeed     float64
 		WindDirection float64
 		Clouds        float64
-		Sunrise       time.Time
-		Sunset        time.Time
 		Timestamp     time.Time
+	}
+
+	DailyDBRecord struct {
+		Date    time.Time
+		Sunrise time.Time
+		Sunset  time.Time
 	}
 
 	Provider interface {
