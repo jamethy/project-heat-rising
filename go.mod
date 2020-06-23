@@ -1,4 +1,4 @@
-module temperature-monitor
+module github.com/jamethy/project-rising-heat
 
 go 1.14
 

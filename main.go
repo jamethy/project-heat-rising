@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/jamesburns-rts/go-env"
-	"temperature-monitor/thermostat"
-	"temperature-monitor/util"
-	"temperature-monitor/weather"
+	"github.com/jamethy/project-rising-heat/internal/thermostat"
+	"github.com/jamethy/project-rising-heat/internal/util"
+	"github.com/jamethy/project-rising-heat/internal/weather"
 )
 
 // todo use grafana

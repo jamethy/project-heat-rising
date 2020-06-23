@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"golang.org/x/net/context/ctxhttp"
-	"temperature-monitor/util"
+	"github.com/jamethy/project-rising-heat/internal/util"
 )
 
 type GetParams struct {

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"temperature-monitor/util/ctxhttp"
-	"temperature-monitor/util/ptr"
+	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
+	"github.com/jamethy/project-rising-heat/internal/util/ptr"
 )
 
 //https://openweathermap.org/current

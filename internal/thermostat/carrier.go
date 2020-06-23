@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"temperature-monitor/util"
-	"temperature-monitor/util/ctxhttp"
-	"temperature-monitor/util/ptr"
+	"github.com/jamethy/project-rising-heat/internal/util"
+	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
+	"github.com/jamethy/project-rising-heat/internal/util/ptr"
 )
 
 type (
