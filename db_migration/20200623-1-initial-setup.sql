@@ -3,10 +3,11 @@ create schema if not exists prh;
 ---- create app user separately first
 -- create schema if not exists prh;
 -- create user prhapp with password '<password here>';
--- grant connect on database projectrisingheat to prhapp;
--- grant usage on schema prh to prhapp;
+-- create user prhreadonly with password '<password here>';
+-- grant connect on database projectrisingheat to prhapp,prhreadonly;
+-- grant usage on schema prh to prhapp,prhreadonly;
 
--- alter default privileges in schema prh grant select on tables to prhapp;
+-- alter default privileges in schema prh grant select on tables to prhapp,prhreadonly;
 -- alter default privileges in schema prh grant insert on tables to prhapp;
 -- alter default privileges in schema prh grant usage,select on sequences to prhapp;
 
