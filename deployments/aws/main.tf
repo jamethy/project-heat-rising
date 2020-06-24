@@ -1,5 +1,7 @@
-// NOTE, before running `AWS_PROFILE=personal aws s3 cp s3://project-rising-heat-infra/terraform/secrets.tfvars .`
-// Run with terraform apply -var-file=secrets.tfvars
+// NOTE, before running you need the secrets file.
+// get file: AWS_PROFILE=personal aws s3 cp s3://project-rising-heat-infra/terraform/secrets.tfvars .
+// upload file: AWS_PROFILE=personal aws s3 cp secrets.tfvars s3://project-rising-heat-infra/terraform/secrets.tfvars
+// Run with: terraform apply -var-file=secrets.tfvars
 // =====================================================================================================================
 
 provider aws {

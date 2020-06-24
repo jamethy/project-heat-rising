@@ -44,3 +44,11 @@ resource aws_cloudwatch_event_target daily_data_target {
   rule = aws_cloudwatch_event_rule.daily_data.name
   arn  = aws_lambda_function.daily_data.arn
 }
+
+resource aws_lambda_permission daily_data_cloudwatch {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.daily_data.function_name}"
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.daily_data.arn
+}

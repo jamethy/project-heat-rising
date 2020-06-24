@@ -22,6 +22,9 @@ resource aws_lambda_function weather {
       OPEN_WEATHER_API_KEY  = var.open_weather_api_key
       OPEN_WEATHER_LAT      = var.open_weather_lat
       OPEN_WEATHER_LON      = var.open_weather_lon
+      DATABASE_URL          = var.database_url
+      DATABASE_USERNAME     = var.database_username
+      DATABASE_PASSWORD     = var.database_password
     }
   }
 }
@@ -40,4 +43,12 @@ resource aws_cloudwatch_event_rule weather {
 resource aws_cloudwatch_event_target weather_target {
   rule = aws_cloudwatch_event_rule.weather.name
   arn  = aws_lambda_function.weather.arn
+}
+
+resource aws_lambda_permission weather_cloudwatch {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.weather.function_name}"
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.weather.arn
 }

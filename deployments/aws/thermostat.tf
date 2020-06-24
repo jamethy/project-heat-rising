@@ -18,8 +18,11 @@ resource aws_lambda_function thermostat {
 
   environment {
     variables = {
-      CARRIER_USERNAME = var.carrier_username
-      CARRIER_PASSWORD = var.carrier_password
+      CARRIER_USERNAME  = var.carrier_username
+      CARRIER_PASSWORD  = var.carrier_password
+      DATABASE_URL      = var.database_url
+      DATABASE_USERNAME = var.database_username
+      DATABASE_PASSWORD = var.database_password
     }
   }
 }
@@ -38,4 +41,12 @@ resource aws_cloudwatch_event_rule thermostat {
 resource aws_cloudwatch_event_target thermostat_target {
   rule = aws_cloudwatch_event_rule.thermostat.name
   arn  = aws_lambda_function.thermostat.arn
+}
+
+resource aws_lambda_permission thermostat_cloudwatch {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.thermostat.function_name}"
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.thermostat.arn
 }

@@ -39,7 +39,9 @@ resource aws_iam_policy lambda_logging {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "${aws_cloudwatch_log_group.daily_data.arn}"
+                "${aws_cloudwatch_log_group.daily_data.arn}",
+                "${aws_cloudwatch_log_group.weather.arn}",
+                "${aws_cloudwatch_log_group.thermostat.arn}"
             ]
         }
     ]
