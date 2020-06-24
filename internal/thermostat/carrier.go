@@ -10,9 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
 	"github.com/jamethy/project-rising-heat/internal/util/ptr"
+	"github.com/volatiletech/null"
 )
 
 type (
@@ -318,7 +320,7 @@ func (c *carrier) GetSummary(ctx context.Context) (*CarrierSummary, error) {
 	return &summary, err
 }
 
-func (c *carrier) GetThermostatDBRecord(ctx context.Context) (*DBRecord, error) {
+func (c *carrier) CreateDBRecord(ctx context.Context) (*db.Thermostat, error) {
 
 	summary, err := c.GetSummary(ctx)
 	if err != nil {
@@ -340,19 +342,19 @@ func (c *carrier) GetThermostatDBRecord(ctx context.Context) (*DBRecord, error) 
 
 	t := data.ThermostatList[0].Runtime
 
-	return &DBRecord{
-		Provider:     "Carrier",
-		ThermostatId: thermostatId,
-		ActualTemp:   c.toF(t.ActualTemperature),
-		Humidity:     float64(t.ActualHumidity),
-		TargetCool:   c.toF(t.DesiredCool),
-		TargetHeat:   c.toF(t.DesiredHeat),
-		IsHeating:    isHeating,
-		IsCooling:    isCooling,
+	return &db.Thermostat{
+		Provider:     null.StringFrom("Carrier"),
+		ThermostatID: null.StringFrom(thermostatId),
+		ActualTemp:   null.Float32From(c.toF(t.ActualTemperature)),
+		Humidity:     null.Float32From(float32(t.ActualHumidity)),
+		TargetCool:   null.Float32From(c.toF(t.DesiredCool)),
+		TargetHeat:   null.Float32From(c.toF(t.DesiredHeat)),
+		IsHeating:    null.BoolFrom(isHeating),
+		IsCooling:    null.BoolFrom(isCooling),
 		Timestamp:    time.Now(),
 	}, nil
 }
 
-func (c *carrier) toF(carrierTemp int) float64 {
-	return float64(carrierTemp) / 10.0
+func (c *carrier) toF(carrierTemp int) float32 {
+	return float32(carrierTemp) / 10.0
 }

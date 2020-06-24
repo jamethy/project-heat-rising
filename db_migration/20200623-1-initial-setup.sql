@@ -8,6 +8,7 @@ create schema if not exists prh;
 
 -- alter default privileges in schema prh grant select on tables to prhapp;
 -- alter default privileges in schema prh grant insert on tables to prhapp;
+-- alter default privileges in schema prh grant usage,select on sequences to prhapp;
 
 -- thermostat table
 create table prh.thermostat
@@ -30,17 +31,17 @@ create index thermostat_timestamp on prh.thermostat (timestamp);
 -- weather table
 create table prh.weather
 (
-    id            serial primary key not null,
-    created_at    timestamptz        not null default now(),
-    timestamp     timestamp          not null,
-    Provider      text,
-    Temperature   float(8),
-    FeelsLike     float(8),
-    Pressure      float(8),
-    Humidity      float(8),
-    WindSpeed     float(8),
-    WindDirection float(8),
-    Clouds        float(8)
+    id             serial primary key not null,
+    created_at     timestamptz        not null default now(),
+    timestamp      timestamp          not null,
+    provider       text,
+    temperature    float(8),
+    feels_like     float(8),
+    pressure       float(8),
+    humidity       float(8),
+    wind_speed     float(8),
+    wind_direction float(8),
+    clouds         float(8)
 );
 
 create index weather_timestamp on prh.weather (timestamp);
@@ -51,8 +52,8 @@ create table prh.daily_data
     id         serial primary key not null,
     created_at timestamptz        not null default now(),
     date       date               not null,
-    Sunrise    timestamptz,
-    Sunset     timestamptz
+    sunrise    timestamptz,
+    sunset     timestamptz
 );
 
 create index daily_data_timestamp on prh.daily_data (date);

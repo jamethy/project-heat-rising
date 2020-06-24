@@ -4,23 +4,13 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/jamethy/project-rising-heat/internal/db"
 )
 
 type (
-	DBRecord struct {
-		Provider     string
-		ThermostatId string
-		ActualTemp   float64
-		Humidity     float64
-		TargetCool   float64
-		TargetHeat   float64
-		IsHeating    bool
-		IsCooling    bool
-		Timestamp    time.Time
-	}
-
 	Provider interface {
-		GetThermostatDBRecord(ctx context.Context) (*DBRecord, error)
+		CreateDBRecord(ctx context.Context) (*db.Thermostat, error)
 	}
 
 	Config struct {
@@ -46,9 +36,9 @@ func New(config Config) (c Client) {
 	return c
 }
 
-func (c *Client) GetThermostatDBRecord(ctx context.Context) (*DBRecord, error) {
+func (c *Client) CreateDBRecord(ctx context.Context) (*db.Thermostat, error) {
 	for _, p := range c.providers {
-		if r, err := p.GetThermostatDBRecord(ctx); err != nil {
+		if r, err := p.CreateDBRecord(ctx); err != nil {
 			fmt.Printf("problem getting thermostat: %s", err)
 		} else {
 			return r, nil

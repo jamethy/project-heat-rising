@@ -4,29 +4,14 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/jamethy/project-rising-heat/internal/db"
 )
 
 type (
-	DBRecord struct {
-		Provider      string
-		Temperature   float64
-		FeelsLike     float64
-		Pressure      float64
-		Humidity      float64
-		WindSpeed     float64
-		WindDirection float64
-		Clouds        float64
-		Timestamp     time.Time
-	}
-
-	DailyDBRecord struct {
-		Date    time.Time
-		Sunrise time.Time
-		Sunset  time.Time
-	}
-
 	Provider interface {
-		GetWeatherDBRecord(ctx context.Context) (*DBRecord, error)
+		CreateDBRecord(ctx context.Context) (*db.Weather, error)
+		CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error)
 	}
 
 	Config struct {
@@ -52,13 +37,24 @@ func New(config Config) (c Client) {
 	return c
 }
 
-func (c *Client) GetWeatherDBRecord(ctx context.Context) (*DBRecord, error) {
+func (c *Client) CreateDBRecord(ctx context.Context) (*db.Weather, error) {
 	for _, p := range c.providers {
-		if r, err := p.GetWeatherDBRecord(ctx); err != nil {
+		if r, err := p.CreateDBRecord(ctx); err != nil {
 			fmt.Printf("problem getting weather: %s", err)
 		} else {
 			return r, nil
 		}
 	}
 	return nil, fmt.Errorf("no valid weather providers")
+}
+
+func (c *Client) CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error) {
+	for _, p := range c.providers {
+		if r, err := p.CreateDailyDBRecord(ctx); err != nil {
+			fmt.Printf("problem getting daily record: %s", err)
+		} else {
+			return r, nil
+		}
+	}
+	return nil, fmt.Errorf("no valid daily providers")
 }

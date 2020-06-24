@@ -22,6 +22,9 @@ resource aws_lambda_function daily_data {
       OPEN_WEATHER_API_KEY  = var.open_weather_api_key
       OPEN_WEATHER_LAT      = var.open_weather_lat
       OPEN_WEATHER_LON      = var.open_weather_lon
+      DATABASE_URL          = var.database_url
+      DATABASE_USERNAME     = var.database_username
+      DATABASE_PASSWORD     = var.database_password
     }
   }
 }

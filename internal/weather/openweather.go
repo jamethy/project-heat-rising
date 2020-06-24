@@ -7,8 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
 	"github.com/jamethy/project-rising-heat/internal/util/ptr"
+	"github.com/volatiletech/null"
 )
 
 //https://openweathermap.org/current
@@ -51,8 +53,8 @@ type (
 		Cod        *int       `json:"cod"`
 	}
 	coord struct {
-		Lon *float64 `json:"lon"`
-		Lat *float64 `json:"lat"`
+		Lon *float32 `json:"lon"`
+		Lat *float32 `json:"lat"`
 	}
 	weather struct {
 		ID          *int    `json:"id"`
@@ -61,19 +63,19 @@ type (
 		Icon        *string `json:"icon"`
 	}
 	main struct {
-		Temp      *float64 `json:"temp"`
-		FeelsLike *float64 `json:"feels_like"`
-		TempMin   *float64 `json:"temp_min"`
-		TempMax   *float64 `json:"temp_max"`
-		Pressure  *float64 `json:"pressure"`
-		Humidity  *float64 `json:"humidity"`
+		Temp      *float32 `json:"temp"`
+		FeelsLike *float32 `json:"feels_like"`
+		TempMin   *float32 `json:"temp_min"`
+		TempMax   *float32 `json:"temp_max"`
+		Pressure  *float32 `json:"pressure"`
+		Humidity  *float32 `json:"humidity"`
 	}
 	wind struct {
-		Speed *float64 `json:"speed"`
-		Deg   *float64 `json:"deg"`
+		Speed *float32 `json:"speed"`
+		Deg   *float32 `json:"deg"`
 	}
 	clouds struct {
-		All *float64 `json:"all"`
+		All *float32 `json:"all"`
 	}
 	sys struct {
 		Type    *int    `json:"type"`
@@ -139,7 +141,7 @@ func (c *openWeatherClient) GetOpenWeather(ctx context.Context, params getParams
 	return &weather, nil
 }
 
-func (c *openWeatherClient) GetWeatherDBRecord(ctx context.Context) (*DBRecord, error) {
+func (c *openWeatherClient) CreateDBRecord(ctx context.Context) (*db.Weather, error) {
 
 	// checked earlier
 	lat, _ := strconv.ParseFloat(c.config.Latitude, 10)
@@ -154,15 +156,37 @@ func (c *openWeatherClient) GetWeatherDBRecord(ctx context.Context) (*DBRecord, 
 		return nil, err
 	}
 
-	return &DBRecord{
-		Provider:      "OpenWeatherMaps",
-		Temperature:   *w.Main.Temp,
-		FeelsLike:     *w.Main.FeelsLike,
-		Pressure:      *w.Main.Pressure,
-		Humidity:      *w.Main.Humidity,
-		WindSpeed:     *w.Wind.Speed,
-		WindDirection: *w.Wind.Deg,
-		Clouds:        *w.Clouds.All,
+	return &db.Weather{
+		Provider:      null.StringFrom("OpenWeatherMaps"),
+		Temperature:   null.Float32FromPtr(w.Main.Temp),
+		FeelsLike:     null.Float32FromPtr(w.Main.FeelsLike),
+		Pressure:      null.Float32FromPtr(w.Main.Pressure),
+		Humidity:      null.Float32FromPtr(w.Main.Humidity),
+		WindSpeed:     null.Float32FromPtr(w.Wind.Speed),
+		WindDirection: null.Float32FromPtr(w.Wind.Deg),
+		Clouds:        null.Float32FromPtr(w.Clouds.All),
 		Timestamp:     time.Now(),
+	}, nil
+}
+
+func (c *openWeatherClient) CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error) {
+
+	// checked earlier
+	lat, _ := strconv.ParseFloat(c.config.Latitude, 10)
+	lon, _ := strconv.ParseFloat(c.config.Longitude, 10)
+
+	w, err := c.GetOpenWeather(ctx, getParams{
+		Lat:   &lat,
+		Lon:   &lon,
+		Units: ptr.Str("imperial"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &db.DailyDatum{
+		Date:    time.Now(),
+		Sunrise: null.TimeFromPtr(w.GetSunrise()),
+		Sunset:  null.TimeFromPtr(w.GetSunset()),
 	}, nil
 }

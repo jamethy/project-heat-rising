@@ -5,19 +5,23 @@ import (
 	"log"
 
 	"github.com/jamesburns-rts/go-env"
+	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/weather"
+	"github.com/volatiletech/sqlboiler/boil"
 )
 
 // todo use grafana
 
 type AppConfig struct {
+	DB         db.Config
 	Thermostat thermostat.Config
 	Weather    weather.Config
 }
 
 var config = AppConfig{
+	DB:         db.DefaultConfig,
 	Thermostat: thermostat.DefaultConfig,
 	Weather:    weather.DefaultConfig,
 }
@@ -29,20 +33,32 @@ func main() {
 		log.Fatal("failed to get config: ", err)
 	}
 
+	d, err := db.Connect(config.DB)
+	if err != nil {
+		log.Fatal("failed to connected to database: ", err)
+	}
+
+	ctx := context.Background()
+
 	util.PrettyPrint(config)
 
 	w := weather.New(config.Weather)
-	wrec, err := w.GetWeatherDBRecord(context.Background())
+	wrec, err := w.CreateDBRecord(ctx)
 	if err != nil {
 		panic(err)
+	}
+
+	err = wrec.Insert(ctx, d, boil.Infer())
+	if err != nil {
+		log.Fatal("failed to write to database: ", err)
 	}
 	util.PrettyPrint(wrec)
-
-	c := thermostat.New(config.Thermostat)
-	trec, err := c.GetThermostatDBRecord(context.Background())
-	if err != nil {
-		panic(err)
-	}
-	util.PrettyPrint(trec)
+	//
+	//c := thermostat.New(config.Thermostat)
+	//trec, err := c.GetThermostatDBRecord(context.Background())
+	//if err != nil {
+	//	panic(err)
+	//}
+	//util.PrettyPrint(trec)
 
 }

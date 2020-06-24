@@ -14,6 +14,11 @@ build-weather-lambda:
 
 build-all: build-daily-data-lambda build-thermostat-lambda build-weather-lambda
 
+generate:
+	rm `grep -l SQLBoiler internal/db/*` || true
+	sqlboiler -c internal/db/sqlboiler.toml --no-tests -o internal/db -p db psql
+
+
 test:
 	go test -v ./...
 clean:
