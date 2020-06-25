@@ -153,6 +153,19 @@ type (
 		Password string `url:"password" env:"CARRIER_PASSWORD"`
 	}
 
+	CarrierToken struct {
+		AccessToken  string `json:"access_token"`
+		ExpiresIn    int    `json:"expires_in"`
+		RefreshToken string `json:"refresh_token"`
+		Scope        string `json:"scope"`
+		TokenType    string `json:"token_type"`
+	}
+
+	CarrierRefreshRequest struct {
+		GrantType string `url:"grant_type"`
+		Code      string `url:"code"`
+	}
+
 	CarrierConfig struct {
 		CarrierLogin
 		BaseUrl string        `env:"CARRIER_BASE_URL"`
@@ -160,9 +173,11 @@ type (
 	}
 
 	carrier struct {
-		config  CarrierConfig
-		cookies []*http.Cookie
-		client  *http.Client
+		config       CarrierConfig
+		cookies      []*http.Cookie
+		tokens       *CarrierToken
+		tokenExpires time.Time
+		client       *http.Client
 	}
 )
 
@@ -178,12 +193,16 @@ func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 	}
 
-	for _, cookie := range c.cookies {
-		req.AddCookie(cookie)
-		if cookie.Name == "AUTHZ_TOKEN_COOKIE" {
-			req.Header.Set("Authorization", "Bearer "+cookie.Value)
+	if c.tokens == nil || c.tokenExpires.Before(time.Now()) {
+		var err error
+		c.tokens, err = c.RefreshToken(req.Context())
+		if err != nil {
+			return nil, err
 		}
+		c.tokenExpires = time.Now().Add(time.Duration(c.tokens.ExpiresIn) * time.Second)
 	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("%s %s", c.tokens.TokenType, c.tokens.AccessToken))
 
 	return http.DefaultTransport.RoundTrip(req)
 }
@@ -237,6 +256,77 @@ func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie
 	}
 
 	return res.Cookies(), nil
+}
+
+func (c *carrier) RefreshToken(ctx context.Context) (*CarrierToken, error) {
+	if c.cookies == nil {
+		return nil, fmt.Errorf("need cookies first")
+	}
+
+	var refreshToken string
+	for _, cookie := range c.cookies {
+		if cookie.Name == "REFRESH_TOKEN_COOKIE" {
+			refreshToken = cookie.Value
+			break
+		}
+	}
+
+	if refreshToken == "" {
+		return nil, fmt.Errorf("no refresh token")
+	}
+
+	uri := c.config.BaseUrl + "/token"
+
+	r := &CarrierRefreshRequest{
+		GrantType: "refresh_token",
+		Code:      refreshToken,
+	}
+	uri, err := util.AddQueryParameters(uri, r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to add query parameters: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, uri, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create auth request: %w", err)
+	}
+
+	req.Header.Add("referer", "https://www.myhome.carrier.com/carrier/consumerportal/index.html")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	for _, cookie := range c.cookies {
+		req.AddCookie(cookie)
+	}
+
+	h := *c.client
+	h.Transport = http.DefaultTransport
+	res, err := ctxhttp.Do(ctx, &h, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to make authentication call: %w", err)
+	}
+	defer util.SafeClose(res.Body)
+	if res.StatusCode != 200 {
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+		return nil, fmt.Errorf("bad response code: %d - %s", res.StatusCode, string(body))
+	}
+
+	tokens := new(CarrierToken)
+	err = json.NewDecoder(res.Body).Decode(tokens)
+	if err != nil {
+		return tokens, fmt.Errorf("unable to decode body: %w", err)
+	}
+	return tokens, nil
+	// POST
+	// application/x-www-form-url-encoded
+	// cookies
+	//https://www.myhome.carrier.com/home/token
+	//    grant_type=refresh_token
+	//    code=6p52szzJ4OiGWXnPMTM9LM4H4nR6eWlc
+	//    client_id=
+	// referer: https://www.myhome.carrier.com/carrier/consumerportal/index.html
+
 }
 
 func (c *carrier) GetThermostat(ctx context.Context, id string) (*CarrierResponse, error) {
