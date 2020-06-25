@@ -9,7 +9,6 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/weather"
-	"github.com/volatiletech/sqlboiler/boil"
 )
 
 // todo use grafana
@@ -33,10 +32,10 @@ func main() {
 		log.Fatal("failed to get config: ", err)
 	}
 
-	d, err := db.Connect(config.DB)
-	if err != nil {
-		log.Fatal("failed to connected to database: ", err)
-	}
+	//d, err := db.Connect(config.DB)
+	//if err != nil {
+	//	log.Fatal("failed to connected to database: ", err)
+	//}
 
 	ctx := context.Background()
 
@@ -48,17 +47,20 @@ func main() {
 		panic(err)
 	}
 
-	err = wrec.Insert(ctx, d, boil.Infer())
-	if err != nil {
-		log.Fatal("failed to write to database: ", err)
-	}
-	util.PrettyPrint(wrec)
-	//
-	//c := thermostat.New(config.Thermostat)
-	//trec, err := c.GetThermostatDBRecord(context.Background())
+	//err = wrec.Insert(ctx, d, boil.Infer())
 	//if err != nil {
-	//	panic(err)
+	//	log.Fatal("failed to write to database: ", err)
 	//}
-	//util.PrettyPrint(trec)
+	util.PrettyPrint(wrec)
 
+	c := thermostat.New(config.Thermostat)
+	trec, err := c.CreateDBRecord(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	//err = trec.Insert(ctx, d, boil.Infer())
+	//if err != nil {
+	//	log.Fatal("failed to write to database: ", err)
+	//}
+	util.PrettyPrint(trec)
 }

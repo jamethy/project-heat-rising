@@ -200,6 +200,14 @@ func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 			return nil, err
 		}
 		c.tokenExpires = time.Now().Add(time.Duration(c.tokens.ExpiresIn) * time.Second)
+		for _, cookie := range c.cookies {
+			switch cookie.Name {
+			case "AUTHZ_TOKEN_COOKIE":
+				cookie.Value = c.tokens.AccessToken
+			case "REFRESH_TOKEN_COOKIE":
+				cookie.Value = c.tokens.RefreshToken
+			}
+		}
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("%s %s", c.tokens.TokenType, c.tokens.AccessToken))
