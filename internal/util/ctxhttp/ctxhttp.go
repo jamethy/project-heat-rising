@@ -19,6 +19,15 @@ type GetParams struct {
 	Destination interface{}
 }
 
+type PostParams struct {
+	Ctx         context.Context
+	HttpClient  *http.Client
+	URL         string
+	Body       interface{}
+	Query       interface{}
+	Destination interface{}
+}
+
 func Get(params GetParams) (*http.Response, error) {
 
 	if params.Query != nil {

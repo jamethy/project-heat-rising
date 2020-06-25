@@ -184,8 +184,7 @@ type (
 func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 	fmt.Println("Authorizing request...")
 	if c.cookies == nil {
-		// todo check expiration
-		fmt.Println("Existing auth cookie not found, reauthenticating")
+		fmt.Println("Existing auth cookie not found, logging in")
 		var err error
 		c.cookies, err = c.Login(req.Context(), c.config.CarrierLogin)
 		if err != nil {
@@ -194,6 +193,7 @@ func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	if c.tokens == nil || c.tokenExpires.Before(time.Now()) {
+		fmt.Printf("Tokens not found or expired: %t\n", c.tokens == nil)
 		var err error
 		c.tokens, err = c.RefreshToken(req.Context())
 		if err != nil {
@@ -204,6 +204,7 @@ func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	req.Header.Set("Authorization", fmt.Sprintf("%s %s", c.tokens.TokenType, c.tokens.AccessToken))
 
+	fmt.Println("making an authorized call: " + req.RequestURI)
 	return http.DefaultTransport.RoundTrip(req)
 }
 
@@ -226,6 +227,7 @@ func (c *CarrierConfig) IsValid() bool {
 
 func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie, error) {
 	uri := c.config.BaseUrl + "/login/"
+	fmt.Println("carrier: Calling /login")
 
 	uri, err := util.AddQueryParameters(uri, login)
 	if err != nil {
@@ -259,6 +261,7 @@ func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie
 }
 
 func (c *carrier) RefreshToken(ctx context.Context) (*CarrierToken, error) {
+	fmt.Println("carrier: Refresh /token")
 	if c.cookies == nil {
 		return nil, fmt.Errorf("need cookies first")
 	}
@@ -317,16 +320,8 @@ func (c *carrier) RefreshToken(ctx context.Context) (*CarrierToken, error) {
 	if err != nil {
 		return tokens, fmt.Errorf("unable to decode body: %w", err)
 	}
-	return tokens, nil
-	// POST
-	// application/x-www-form-url-encoded
-	// cookies
-	//https://www.myhome.carrier.com/home/token
-	//    grant_type=refresh_token
-	//    code=6p52szzJ4OiGWXnPMTM9LM4H4nR6eWlc
-	//    client_id=
-	// referer: https://www.myhome.carrier.com/carrier/consumerportal/index.html
 
+	return tokens, nil
 }
 
 func (c *carrier) GetThermostat(ctx context.Context, id string) (*CarrierResponse, error) {

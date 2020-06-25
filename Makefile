@@ -1,3 +1,4 @@
+# todo learn how to write make properly
 all: test build-all
 
 build-daily-data-lambda:
@@ -13,6 +14,21 @@ build-weather-lambda:
 	zip -j -qq ./bin/weather-lambda.zip ./bin/weather-lambda
 
 build-all: build-daily-data-lambda build-thermostat-lambda build-weather-lambda
+
+# todo use goreleaser
+deploy-daily-data-lambda:
+	AWS_PROFILE=personal aws s3 cp bin/thermostat-lambda.zip s3://project-rising-heat-infra/lambdas/daily-data-lambda.zip
+	AWS_PROFILE=personal aws lambda update-function-code --function-name prh-daily-data --s3-bucket project-rising-heat-infra --s3-key lambdas/daily-data-lambda.zip
+
+deploy-thermostat-lambda:
+	AWS_PROFILE=personal aws s3 cp bin/thermostat-lambda.zip s3://project-rising-heat-infra/lambdas/thermostat-lambda.zip
+	AWS_PROFILE=personal aws lambda update-function-code --function-name prh-thermostat --s3-bucket project-rising-heat-infra --s3-key lambdas/thermostat-lambda.zip
+
+deploy-weather-lambda:
+	AWS_PROFILE=personal aws s3 cp bin/weather-lambda.zip s3://project-rising-heat-infra/lambdas/weather-lambda.zip
+	AWS_PROFILE=personal aws lambda update-function-code --function-name prh-weather --s3-bucket project-rising-heat-infra --s3-key lambdas/weather-lambda.zip
+
+deploy-all: deploy-daily-data-lambda deploy-thermostat-lambda deploy-weather-lambda
 
 generate:
 	rm `grep -l SQLBoiler internal/db/*` || true
