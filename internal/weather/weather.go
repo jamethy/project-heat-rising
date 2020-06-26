@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jamethy/project-rising-heat/internal/db"
+	"github.com/jamethy/project-rising-heat/internal/weather/openweather"
 )
 
 type (
@@ -15,7 +16,7 @@ type (
 	}
 
 	Config struct {
-		OpenWeather OpenWeatherConfig
+		OpenWeather openweather.Config
 	}
 	Client struct {
 		config    Config
@@ -24,7 +25,7 @@ type (
 )
 
 var DefaultConfig = Config{
-	OpenWeather: OpenWeatherConfig{
+	OpenWeather: openweather.Config{
 		Timeout: 30 * time.Second,
 	},
 }
@@ -32,7 +33,7 @@ var DefaultConfig = Config{
 func New(config Config) (c Client) {
 	c.config = config
 	if config.OpenWeather.IsValid() {
-		c.providers = append(c.providers, newOpenWeatherClient(config.OpenWeather))
+		c.providers = append(c.providers, openweather.New(config.OpenWeather))
 	}
 	return c
 }

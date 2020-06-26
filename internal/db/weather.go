@@ -24,74 +24,89 @@ import (
 
 // Weather is an object representing the database table.
 type Weather struct {
-	ID            int          `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedAt     time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	Timestamp     time.Time    `boil:"timestamp" json:"timestamp" toml:"timestamp" yaml:"timestamp"`
-	Provider      null.String  `boil:"provider" json:"provider,omitempty" toml:"provider" yaml:"provider,omitempty"`
-	Temperature   null.Float32 `boil:"temperature" json:"temperature,omitempty" toml:"temperature" yaml:"temperature,omitempty"`
-	FeelsLike     null.Float32 `boil:"feels_like" json:"feels_like,omitempty" toml:"feels_like" yaml:"feels_like,omitempty"`
-	Pressure      null.Float32 `boil:"pressure" json:"pressure,omitempty" toml:"pressure" yaml:"pressure,omitempty"`
-	Humidity      null.Float32 `boil:"humidity" json:"humidity,omitempty" toml:"humidity" yaml:"humidity,omitempty"`
-	WindSpeed     null.Float32 `boil:"wind_speed" json:"wind_speed,omitempty" toml:"wind_speed" yaml:"wind_speed,omitempty"`
-	WindDirection null.Float32 `boil:"wind_direction" json:"wind_direction,omitempty" toml:"wind_direction" yaml:"wind_direction,omitempty"`
-	Clouds        null.Float32 `boil:"clouds" json:"clouds,omitempty" toml:"clouds" yaml:"clouds,omitempty"`
+	ID                 int          `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt          time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	Timestamp          time.Time    `boil:"timestamp" json:"timestamp" toml:"timestamp" yaml:"timestamp"`
+	Provider           null.String  `boil:"provider" json:"provider,omitempty" toml:"provider" yaml:"provider,omitempty"`
+	Temperature        null.Float32 `boil:"temperature" json:"temperature,omitempty" toml:"temperature" yaml:"temperature,omitempty"`
+	FeelsLike          null.Float32 `boil:"feels_like" json:"feels_like,omitempty" toml:"feels_like" yaml:"feels_like,omitempty"`
+	Pressure           null.Float32 `boil:"pressure" json:"pressure,omitempty" toml:"pressure" yaml:"pressure,omitempty"`
+	Humidity           null.Float32 `boil:"humidity" json:"humidity,omitempty" toml:"humidity" yaml:"humidity,omitempty"`
+	WindSpeed          null.Float32 `boil:"wind_speed" json:"wind_speed,omitempty" toml:"wind_speed" yaml:"wind_speed,omitempty"`
+	WindDirection      null.Float32 `boil:"wind_direction" json:"wind_direction,omitempty" toml:"wind_direction" yaml:"wind_direction,omitempty"`
+	Clouds             null.Float32 `boil:"clouds" json:"clouds,omitempty" toml:"clouds" yaml:"clouds,omitempty"`
+	UvIndex            null.Float32 `boil:"uv_index" json:"uv_index,omitempty" toml:"uv_index" yaml:"uv_index,omitempty"`
+	RainLevel          null.Float32 `boil:"rain_level" json:"rain_level,omitempty" toml:"rain_level" yaml:"rain_level,omitempty"`
+	WeatherDescription null.String  `boil:"weather_description" json:"weather_description,omitempty" toml:"weather_description" yaml:"weather_description,omitempty"`
 
 	R *weatherR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L weatherL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var WeatherColumns = struct {
-	ID            string
-	CreatedAt     string
-	Timestamp     string
-	Provider      string
-	Temperature   string
-	FeelsLike     string
-	Pressure      string
-	Humidity      string
-	WindSpeed     string
-	WindDirection string
-	Clouds        string
+	ID                 string
+	CreatedAt          string
+	Timestamp          string
+	Provider           string
+	Temperature        string
+	FeelsLike          string
+	Pressure           string
+	Humidity           string
+	WindSpeed          string
+	WindDirection      string
+	Clouds             string
+	UvIndex            string
+	RainLevel          string
+	WeatherDescription string
 }{
-	ID:            "id",
-	CreatedAt:     "created_at",
-	Timestamp:     "timestamp",
-	Provider:      "provider",
-	Temperature:   "temperature",
-	FeelsLike:     "feels_like",
-	Pressure:      "pressure",
-	Humidity:      "humidity",
-	WindSpeed:     "wind_speed",
-	WindDirection: "wind_direction",
-	Clouds:        "clouds",
+	ID:                 "id",
+	CreatedAt:          "created_at",
+	Timestamp:          "timestamp",
+	Provider:           "provider",
+	Temperature:        "temperature",
+	FeelsLike:          "feels_like",
+	Pressure:           "pressure",
+	Humidity:           "humidity",
+	WindSpeed:          "wind_speed",
+	WindDirection:      "wind_direction",
+	Clouds:             "clouds",
+	UvIndex:            "uv_index",
+	RainLevel:          "rain_level",
+	WeatherDescription: "weather_description",
 }
 
 // Generated where
 
 var WeatherWhere = struct {
-	ID            whereHelperint
-	CreatedAt     whereHelpertime_Time
-	Timestamp     whereHelpertime_Time
-	Provider      whereHelpernull_String
-	Temperature   whereHelpernull_Float32
-	FeelsLike     whereHelpernull_Float32
-	Pressure      whereHelpernull_Float32
-	Humidity      whereHelpernull_Float32
-	WindSpeed     whereHelpernull_Float32
-	WindDirection whereHelpernull_Float32
-	Clouds        whereHelpernull_Float32
+	ID                 whereHelperint
+	CreatedAt          whereHelpertime_Time
+	Timestamp          whereHelpertime_Time
+	Provider           whereHelpernull_String
+	Temperature        whereHelpernull_Float32
+	FeelsLike          whereHelpernull_Float32
+	Pressure           whereHelpernull_Float32
+	Humidity           whereHelpernull_Float32
+	WindSpeed          whereHelpernull_Float32
+	WindDirection      whereHelpernull_Float32
+	Clouds             whereHelpernull_Float32
+	UvIndex            whereHelpernull_Float32
+	RainLevel          whereHelpernull_Float32
+	WeatherDescription whereHelpernull_String
 }{
-	ID:            whereHelperint{field: `id`},
-	CreatedAt:     whereHelpertime_Time{field: `created_at`},
-	Timestamp:     whereHelpertime_Time{field: `timestamp`},
-	Provider:      whereHelpernull_String{field: `provider`},
-	Temperature:   whereHelpernull_Float32{field: `temperature`},
-	FeelsLike:     whereHelpernull_Float32{field: `feels_like`},
-	Pressure:      whereHelpernull_Float32{field: `pressure`},
-	Humidity:      whereHelpernull_Float32{field: `humidity`},
-	WindSpeed:     whereHelpernull_Float32{field: `wind_speed`},
-	WindDirection: whereHelpernull_Float32{field: `wind_direction`},
-	Clouds:        whereHelpernull_Float32{field: `clouds`},
+	ID:                 whereHelperint{field: `id`},
+	CreatedAt:          whereHelpertime_Time{field: `created_at`},
+	Timestamp:          whereHelpertime_Time{field: `timestamp`},
+	Provider:           whereHelpernull_String{field: `provider`},
+	Temperature:        whereHelpernull_Float32{field: `temperature`},
+	FeelsLike:          whereHelpernull_Float32{field: `feels_like`},
+	Pressure:           whereHelpernull_Float32{field: `pressure`},
+	Humidity:           whereHelpernull_Float32{field: `humidity`},
+	WindSpeed:          whereHelpernull_Float32{field: `wind_speed`},
+	WindDirection:      whereHelpernull_Float32{field: `wind_direction`},
+	Clouds:             whereHelpernull_Float32{field: `clouds`},
+	UvIndex:            whereHelpernull_Float32{field: `uv_index`},
+	RainLevel:          whereHelpernull_Float32{field: `rain_level`},
+	WeatherDescription: whereHelpernull_String{field: `weather_description`},
 }
 
 // WeatherRels is where relationship names are stored.
@@ -111,8 +126,8 @@ func (*weatherR) NewStruct() *weatherR {
 type weatherL struct{}
 
 var (
-	weatherColumns               = []string{"id", "created_at", "timestamp", "provider", "temperature", "feels_like", "pressure", "humidity", "wind_speed", "wind_direction", "clouds"}
-	weatherColumnsWithoutDefault = []string{"timestamp", "provider", "temperature", "feels_like", "pressure", "humidity", "wind_speed", "wind_direction", "clouds"}
+	weatherColumns               = []string{"id", "created_at", "timestamp", "provider", "temperature", "feels_like", "pressure", "humidity", "wind_speed", "wind_direction", "clouds", "uv_index", "rain_level", "weather_description"}
+	weatherColumnsWithoutDefault = []string{"timestamp", "provider", "temperature", "feels_like", "pressure", "humidity", "wind_speed", "wind_direction", "clouds", "uv_index", "rain_level", "weather_description"}
 	weatherColumnsWithDefault    = []string{"id", "created_at"}
 	weatherPrimaryKeyColumns     = []string{"id"}
 )
