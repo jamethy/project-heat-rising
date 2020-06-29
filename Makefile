@@ -13,7 +13,11 @@ build-weather-lambda:
 	GOARCH=amd64 GOOS=linux go build -v -o bin/weather-lambda -ldflags "-w -s" ./cmd/weather_lambda/main.go
 	zip -j -qq ./bin/weather-lambda.zip ./bin/weather-lambda
 
-build-all: build-daily-data-lambda build-thermostat-lambda build-weather-lambda
+build-upstairs-lambda:
+	GOARCH=amd64 GOOS=linux go build -v -o bin/upstairs-lambda -ldflags "-w -s" ./cmd/upstairs_lambda/main.go
+	zip -j -qq ./bin/upstairs-lambda.zip ./bin/upstairs-lambda
+
+build-all: build-daily-data-lambda build-thermostat-lambda build-weather-lambda build-upstairs-lambda
 
 # todo use goreleaser
 deploy-daily-data-lambda:
@@ -28,7 +32,11 @@ deploy-weather-lambda:
 	AWS_PROFILE=personal aws s3 cp bin/weather-lambda.zip s3://project-rising-heat-infra/lambdas/weather-lambda.zip
 	AWS_PROFILE=personal aws lambda update-function-code --function-name prh-weather --s3-bucket project-rising-heat-infra --s3-key lambdas/weather-lambda.zip
 
-deploy-all: deploy-daily-data-lambda deploy-thermostat-lambda deploy-weather-lambda
+deploy-upstairs-lambda:
+	AWS_PROFILE=personal aws s3 cp bin/upstairs-lambda.zip s3://project-rising-heat-infra/lambdas/upstairs-lambda.zip
+	AWS_PROFILE=personal aws lambda update-function-code --function-name prh-upstairs --s3-bucket project-rising-heat-infra --s3-key lambdas/upstairs-lambda.zip
+
+deploy-all: deploy-daily-data-lambda deploy-thermostat-lambda deploy-weather-lambda deploy-upstairs-lambda
 
 generate:
 	rm `grep -l SQLBoiler internal/db/*` || true

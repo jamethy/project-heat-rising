@@ -76,6 +76,10 @@
         {
           "alias": "feels_like",
           "fill": 0
+        },
+        {
+          "alias": "upstairs_temperature",
+          "fill": 0
         }
       ],
       "spaceLength": 10,
@@ -145,6 +149,34 @@
               "type": "macro"
             }
           ]
+        },
+        {
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  timestamp AS \"time\",\n  temperature as upstairs_temperature\nFROM prh.upstairs\nWHERE\n  $__timeFilter(timestamp)\nORDER BY 1",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "temperature as upstairs_temperature"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "prh.upstairs",
+          "timeColumn": "timestamp",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -197,8 +229,8 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
-    "to": "now"
+    "from": "2020-06-29T12:21:04.792Z",
+    "to": "2020-06-29T16:47:18.563Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -216,5 +248,5 @@
   "timezone": "",
   "title": "My House",
   "uid": "tWL85PZGk",
-  "version": 4
+  "version": 5
 }

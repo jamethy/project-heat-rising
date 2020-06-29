@@ -46,7 +46,7 @@ resource aws_cloudwatch_event_target thermostat_target {
 resource aws_lambda_permission thermostat_cloudwatch {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.thermostat.function_name}"
+  function_name = aws_lambda_function.thermostat.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.thermostat.arn
 }

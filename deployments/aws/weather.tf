@@ -37,7 +37,7 @@ resource aws_cloudwatch_log_group weather {
 
 resource aws_cloudwatch_event_rule weather {
   name                = "${local.prefix}-weather"
-  schedule_expression = "cron(* * * * ? *)" // Every minute
+  schedule_expression = "cron(*/2 * * * ? *)" // Every minute
 }
 
 resource aws_cloudwatch_event_target weather_target {
@@ -48,7 +48,7 @@ resource aws_cloudwatch_event_target weather_target {
 resource aws_lambda_permission weather_cloudwatch {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.weather.function_name}"
+  function_name = aws_lambda_function.weather.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.weather.arn
 }

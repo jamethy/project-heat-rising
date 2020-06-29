@@ -6,9 +6,11 @@ package db
 var TableNames = struct {
 	DailyData  string
 	Thermostat string
+	Upstairs   string
 	Weather    string
 }{
 	DailyData:  "daily_data",
 	Thermostat: "thermostat",
+	Upstairs:   "upstairs",
 	Weather:    "weather",
 }
