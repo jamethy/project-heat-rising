@@ -6,6 +6,7 @@ import (
 
 	"github.com/jamesburns-rts/go-env"
 	"github.com/jamethy/project-rising-heat/internal/db"
+	"github.com/jamethy/project-rising-heat/internal/task"
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/weather"
@@ -36,30 +37,26 @@ func main() {
 		log.Fatal("failed to connected to database: ", err)
 	}
 
+	boil.DebugMode = true
 	ctx := context.Background()
 
 	util.PrettyPrint(config)
 
 	w := weather.New(config.Weather)
-	wrec, err := w.CreateDBRecord(ctx)
+	t := thermostat.New(config.Thermostat)
+
+	err = task.Weather(ctx, d, w)
 	if err != nil {
 		panic(err)
 	}
 
-	err = wrec.Insert(ctx, d, boil.Infer())
-	if err != nil {
-		log.Fatal("failed to write to database: ", err)
-	}
-	util.PrettyPrint(wrec)
-
-	c := thermostat.New(config.Thermostat)
-	trec, err := c.CreateDBRecord(context.Background())
+	err = task.Thermostat(ctx, d, t)
 	if err != nil {
 		panic(err)
 	}
-	err = trec.Insert(ctx, d, boil.Infer())
+
+	err = task.DailyData(ctx, d, w)
 	if err != nil {
-		log.Fatal("failed to write to database: ", err)
+		panic(err)
 	}
-	util.PrettyPrint(trec)
 }

@@ -24,28 +24,82 @@ import (
 
 // DailyDatum is an object representing the database table.
 type DailyDatum struct {
-	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	Date      time.Time `boil:"date" json:"date" toml:"date" yaml:"date"`
-	Sunrise   null.Time `boil:"sunrise" json:"sunrise,omitempty" toml:"sunrise" yaml:"sunrise,omitempty"`
-	Sunset    null.Time `boil:"sunset" json:"sunset,omitempty" toml:"sunset" yaml:"sunset,omitempty"`
+	ID             int          `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt      time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	Date           time.Time    `boil:"date" json:"date" toml:"date" yaml:"date"`
+	Sunrise        null.Time    `boil:"sunrise" json:"sunrise,omitempty" toml:"sunrise" yaml:"sunrise,omitempty"`
+	Sunset         null.Time    `boil:"sunset" json:"sunset,omitempty" toml:"sunset" yaml:"sunset,omitempty"`
+	SummaryDate    null.Time    `boil:"summary_date" json:"summary_date,omitempty" toml:"summary_date" yaml:"summary_date,omitempty"`
+	BedTimeTemp    null.Float32 `boil:"bed_time_temp" json:"bed_time_temp,omitempty" toml:"bed_time_temp" yaml:"bed_time_temp,omitempty"`
+	FanOn          null.String  `boil:"fan_on" json:"fan_on,omitempty" toml:"fan_on" yaml:"fan_on,omitempty"`
+	TemperatureMax null.Float32 `boil:"temperature_max" json:"temperature_max,omitempty" toml:"temperature_max" yaml:"temperature_max,omitempty"`
+	TemperatureAvg null.Float32 `boil:"temperature_avg" json:"temperature_avg,omitempty" toml:"temperature_avg" yaml:"temperature_avg,omitempty"`
+	TemperatureSum null.Float32 `boil:"temperature_sum" json:"temperature_sum,omitempty" toml:"temperature_sum" yaml:"temperature_sum,omitempty"`
+	FeelsLikeMax   null.Float32 `boil:"feels_like_max" json:"feels_like_max,omitempty" toml:"feels_like_max" yaml:"feels_like_max,omitempty"`
+	FeelsLikeAvg   null.Float32 `boil:"feels_like_avg" json:"feels_like_avg,omitempty" toml:"feels_like_avg" yaml:"feels_like_avg,omitempty"`
+	FeelsLikeSum   null.Float32 `boil:"feels_like_sum" json:"feels_like_sum,omitempty" toml:"feels_like_sum" yaml:"feels_like_sum,omitempty"`
+	UvMax          null.Float32 `boil:"uv_max" json:"uv_max,omitempty" toml:"uv_max" yaml:"uv_max,omitempty"`
+	UvAvg          null.Float32 `boil:"uv_avg" json:"uv_avg,omitempty" toml:"uv_avg" yaml:"uv_avg,omitempty"`
+	UvSum          null.Float32 `boil:"uv_sum" json:"uv_sum,omitempty" toml:"uv_sum" yaml:"uv_sum,omitempty"`
+	RainMax        null.Float32 `boil:"rain_max" json:"rain_max,omitempty" toml:"rain_max" yaml:"rain_max,omitempty"`
+	RainAvg        null.Float32 `boil:"rain_avg" json:"rain_avg,omitempty" toml:"rain_avg" yaml:"rain_avg,omitempty"`
+	RainSum        null.Float32 `boil:"rain_sum" json:"rain_sum,omitempty" toml:"rain_sum" yaml:"rain_sum,omitempty"`
+	CloudMax       null.Float32 `boil:"cloud_max" json:"cloud_max,omitempty" toml:"cloud_max" yaml:"cloud_max,omitempty"`
+	CloudAvg       null.Float32 `boil:"cloud_avg" json:"cloud_avg,omitempty" toml:"cloud_avg" yaml:"cloud_avg,omitempty"`
+	CloudSum       null.Float32 `boil:"cloud_sum" json:"cloud_sum,omitempty" toml:"cloud_sum" yaml:"cloud_sum,omitempty"`
 
 	R *dailyDatumR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L dailyDatumL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var DailyDatumColumns = struct {
-	ID        string
-	CreatedAt string
-	Date      string
-	Sunrise   string
-	Sunset    string
+	ID             string
+	CreatedAt      string
+	Date           string
+	Sunrise        string
+	Sunset         string
+	SummaryDate    string
+	BedTimeTemp    string
+	FanOn          string
+	TemperatureMax string
+	TemperatureAvg string
+	TemperatureSum string
+	FeelsLikeMax   string
+	FeelsLikeAvg   string
+	FeelsLikeSum   string
+	UvMax          string
+	UvAvg          string
+	UvSum          string
+	RainMax        string
+	RainAvg        string
+	RainSum        string
+	CloudMax       string
+	CloudAvg       string
+	CloudSum       string
 }{
-	ID:        "id",
-	CreatedAt: "created_at",
-	Date:      "date",
-	Sunrise:   "sunrise",
-	Sunset:    "sunset",
+	ID:             "id",
+	CreatedAt:      "created_at",
+	Date:           "date",
+	Sunrise:        "sunrise",
+	Sunset:         "sunset",
+	SummaryDate:    "summary_date",
+	BedTimeTemp:    "bed_time_temp",
+	FanOn:          "fan_on",
+	TemperatureMax: "temperature_max",
+	TemperatureAvg: "temperature_avg",
+	TemperatureSum: "temperature_sum",
+	FeelsLikeMax:   "feels_like_max",
+	FeelsLikeAvg:   "feels_like_avg",
+	FeelsLikeSum:   "feels_like_sum",
+	UvMax:          "uv_max",
+	UvAvg:          "uv_avg",
+	UvSum:          "uv_sum",
+	RainMax:        "rain_max",
+	RainAvg:        "rain_avg",
+	RainSum:        "rain_sum",
+	CloudMax:       "cloud_max",
+	CloudAvg:       "cloud_avg",
+	CloudSum:       "cloud_sum",
 }
 
 // Generated where
@@ -103,18 +157,100 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_Float32 struct{ field string }
+
+func (w whereHelpernull_Float32) EQ(x null.Float32) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Float32) NEQ(x null.Float32) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Float32) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Float32) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Float32) LT(x null.Float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Float32) LTE(x null.Float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Float32) GT(x null.Float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Float32) GTE(x null.Float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var DailyDatumWhere = struct {
-	ID        whereHelperint
-	CreatedAt whereHelpertime_Time
-	Date      whereHelpertime_Time
-	Sunrise   whereHelpernull_Time
-	Sunset    whereHelpernull_Time
+	ID             whereHelperint
+	CreatedAt      whereHelpertime_Time
+	Date           whereHelpertime_Time
+	Sunrise        whereHelpernull_Time
+	Sunset         whereHelpernull_Time
+	SummaryDate    whereHelpernull_Time
+	BedTimeTemp    whereHelpernull_Float32
+	FanOn          whereHelpernull_String
+	TemperatureMax whereHelpernull_Float32
+	TemperatureAvg whereHelpernull_Float32
+	TemperatureSum whereHelpernull_Float32
+	FeelsLikeMax   whereHelpernull_Float32
+	FeelsLikeAvg   whereHelpernull_Float32
+	FeelsLikeSum   whereHelpernull_Float32
+	UvMax          whereHelpernull_Float32
+	UvAvg          whereHelpernull_Float32
+	UvSum          whereHelpernull_Float32
+	RainMax        whereHelpernull_Float32
+	RainAvg        whereHelpernull_Float32
+	RainSum        whereHelpernull_Float32
+	CloudMax       whereHelpernull_Float32
+	CloudAvg       whereHelpernull_Float32
+	CloudSum       whereHelpernull_Float32
 }{
-	ID:        whereHelperint{field: `id`},
-	CreatedAt: whereHelpertime_Time{field: `created_at`},
-	Date:      whereHelpertime_Time{field: `date`},
-	Sunrise:   whereHelpernull_Time{field: `sunrise`},
-	Sunset:    whereHelpernull_Time{field: `sunset`},
+	ID:             whereHelperint{field: `id`},
+	CreatedAt:      whereHelpertime_Time{field: `created_at`},
+	Date:           whereHelpertime_Time{field: `date`},
+	Sunrise:        whereHelpernull_Time{field: `sunrise`},
+	Sunset:         whereHelpernull_Time{field: `sunset`},
+	SummaryDate:    whereHelpernull_Time{field: `summary_date`},
+	BedTimeTemp:    whereHelpernull_Float32{field: `bed_time_temp`},
+	FanOn:          whereHelpernull_String{field: `fan_on`},
+	TemperatureMax: whereHelpernull_Float32{field: `temperature_max`},
+	TemperatureAvg: whereHelpernull_Float32{field: `temperature_avg`},
+	TemperatureSum: whereHelpernull_Float32{field: `temperature_sum`},
+	FeelsLikeMax:   whereHelpernull_Float32{field: `feels_like_max`},
+	FeelsLikeAvg:   whereHelpernull_Float32{field: `feels_like_avg`},
+	FeelsLikeSum:   whereHelpernull_Float32{field: `feels_like_sum`},
+	UvMax:          whereHelpernull_Float32{field: `uv_max`},
+	UvAvg:          whereHelpernull_Float32{field: `uv_avg`},
+	UvSum:          whereHelpernull_Float32{field: `uv_sum`},
+	RainMax:        whereHelpernull_Float32{field: `rain_max`},
+	RainAvg:        whereHelpernull_Float32{field: `rain_avg`},
+	RainSum:        whereHelpernull_Float32{field: `rain_sum`},
+	CloudMax:       whereHelpernull_Float32{field: `cloud_max`},
+	CloudAvg:       whereHelpernull_Float32{field: `cloud_avg`},
+	CloudSum:       whereHelpernull_Float32{field: `cloud_sum`},
 }
 
 // DailyDatumRels is where relationship names are stored.
@@ -134,8 +270,8 @@ func (*dailyDatumR) NewStruct() *dailyDatumR {
 type dailyDatumL struct{}
 
 var (
-	dailyDatumColumns               = []string{"id", "created_at", "date", "sunrise", "sunset"}
-	dailyDatumColumnsWithoutDefault = []string{"date", "sunrise", "sunset"}
+	dailyDatumColumns               = []string{"id", "created_at", "date", "sunrise", "sunset", "summary_date", "bed_time_temp", "fan_on", "temperature_max", "temperature_avg", "temperature_sum", "feels_like_max", "feels_like_avg", "feels_like_sum", "uv_max", "uv_avg", "uv_sum", "rain_max", "rain_avg", "rain_sum", "cloud_max", "cloud_avg", "cloud_sum"}
+	dailyDatumColumnsWithoutDefault = []string{"date", "sunrise", "sunset", "summary_date", "bed_time_temp", "fan_on", "temperature_max", "temperature_avg", "temperature_sum", "feels_like_max", "feels_like_avg", "feels_like_sum", "uv_max", "uv_avg", "uv_sum", "rain_max", "rain_avg", "rain_sum", "cloud_max", "cloud_avg", "cloud_sum"}
 	dailyDatumColumnsWithDefault    = []string{"id", "created_at"}
 	dailyDatumPrimaryKeyColumns     = []string{"id"}
 )

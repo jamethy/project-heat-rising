@@ -7,9 +7,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jamesburns-rts/go-env"
 	"github.com/jamethy/project-rising-heat/internal/db"
+	"github.com/jamethy/project-rising-heat/internal/task"
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
-	"github.com/jamethy/project-rising-heat/internal/util"
-	"github.com/volatiletech/sqlboiler/boil"
 )
 
 type AppConfig struct {
@@ -37,18 +36,7 @@ func main() {
 	t := thermostat.New(config.Thermostat)
 
 	lambda.Start(func(ctx context.Context) error {
-
-		trec, err := t.CreateDBRecord(ctx)
-		if err != nil {
-			return err
-		}
-
-		err = trec.Insert(ctx, d, boil.Infer())
-		if err != nil {
-			log.Fatal("failed to write to database: ", err)
-		}
-
-		util.PrettyPrint(trec)
-		return nil
+		return task.Thermostat(ctx, d, t)
 	})
 }
+

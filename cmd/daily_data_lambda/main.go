@@ -4,13 +4,11 @@ import (
 	"context"
 	"log"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jamesburns-rts/go-env"
 	"github.com/jamethy/project-rising-heat/internal/db"
-	"github.com/jamethy/project-rising-heat/internal/util"
+	"github.com/jamethy/project-rising-heat/internal/task"
 	"github.com/jamethy/project-rising-heat/internal/weather"
-	"github.com/volatiletech/sqlboiler/boil"
-
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type AppConfig struct {
@@ -38,18 +36,6 @@ func main() {
 	w := weather.New(config.Weather)
 
 	lambda.Start(func(ctx context.Context) error {
-
-		drec, err := w.CreateDailyDBRecord(ctx)
-		if err != nil {
-			return err
-		}
-
-		err = drec.Insert(ctx, d, boil.Infer())
-		if err != nil {
-			log.Fatal("failed to write to database: ", err)
-		}
-
-		util.PrettyPrint(drec)
-		return nil
+		return task.DailyData(ctx, d, w)
 	})
 }

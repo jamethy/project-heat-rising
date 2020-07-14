@@ -21,7 +21,7 @@ build-all: build-daily-data-lambda build-thermostat-lambda build-weather-lambda 
 
 # todo use goreleaser
 deploy-daily-data-lambda:
-	AWS_PROFILE=personal aws s3 cp bin/thermostat-lambda.zip s3://project-rising-heat-infra/lambdas/daily-data-lambda.zip
+	AWS_PROFILE=personal aws s3 cp bin/daily-data-lambda.zip s3://project-rising-heat-infra/lambdas/daily-data-lambda.zip
 	AWS_PROFILE=personal aws lambda update-function-code --function-name prh-daily-data --s3-bucket project-rising-heat-infra --s3-key lambdas/daily-data-lambda.zip
 
 deploy-thermostat-lambda:
