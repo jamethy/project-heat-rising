@@ -2,6 +2,7 @@
 
 import json
 import os
+import subprocess
 from datetime import datetime
 
 import boto3
@@ -64,10 +65,14 @@ def sync_sqs():
     for file_name in os.listdir(out_dir):
         upload_file_sqs(f'{out_dir}/{file_name}', sqs)
 
+def sync_local():
+    p = subprocess.Popen("./sense-hat-sync")
+    p.wait()
 
 def main():
     write_sense_data_data()
-    sync_sqs()
+    # sync_sqs()
+    sync_local()
 
 
 main()

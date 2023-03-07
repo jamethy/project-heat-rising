@@ -12,6 +12,7 @@ import (
 )
 
 type AppConfig struct {
+	Lambda  string
 	DB      db.Config
 	Weather weather.Config
 }
@@ -22,6 +23,7 @@ var config = AppConfig{
 }
 
 func main() {
+	ctx := context.Background()
 
 	_, err := env.UnmarshalFromEnviron(&config)
 	if err != nil {
@@ -35,8 +37,14 @@ func main() {
 
 	w := weather.New(config.Weather)
 
-	lambda.Start(func(ctx context.Context) error {
-		return task.Weather(ctx, d, w)
-	})
+	if config.Lambda == "TRUE" {
+		lambda.Start(func(ctx context.Context) error {
+			return task.DailyData(ctx, d, w)
+		})
+	} else {
+		if err := task.DailyData(ctx, d, w); err != nil {
+			log.Fatal("Error with daily data: ", err)
+		}
+	}
 }
 

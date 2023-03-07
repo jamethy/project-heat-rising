@@ -18,6 +18,7 @@ resource aws_lambda_function weather {
 
   environment {
     variables = {
+      LAMBDA                = "TRUE"
       OPEN_WEATHER_BASE_URL = var.open_weather_base_url
       OPEN_WEATHER_API_KEY  = var.open_weather_api_key
       OPEN_WEATHER_LAT      = var.open_weather_lat

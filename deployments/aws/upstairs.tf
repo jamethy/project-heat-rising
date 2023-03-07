@@ -21,6 +21,7 @@ resource aws_lambda_function upstairs {
 
   environment {
     variables = {
+      LAMBDA            = "TRUE"
       DATABASE_URL      = var.database_url
       DATABASE_USERNAME = var.database_username
       DATABASE_PASSWORD = var.database_password

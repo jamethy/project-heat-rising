@@ -12,6 +12,7 @@ import (
 )
 
 type AppConfig struct {
+	Lambda     string
 	DB         db.Config
 	Thermostat thermostat.Config
 }
@@ -35,8 +36,13 @@ func main() {
 
 	t := thermostat.New(config.Thermostat)
 
-	lambda.Start(func(ctx context.Context) error {
-		return task.Thermostat(ctx, d, t)
-	})
+	if config.Lambda == "TRUE" {
+		lambda.Start(func(ctx context.Context) error {
+			return task.Thermostat(ctx, d, t)
+		})
+	} else {
+		if err := task.Thermostat(context.Background(), d, t); err != nil {
+			log.Fatal("Error with thermostat: ", err)
+		}
+	}
 }
-

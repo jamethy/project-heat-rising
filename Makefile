@@ -17,7 +17,20 @@ build-upstairs-lambda:
 	GOARCH=amd64 GOOS=linux go build -v -o bin/upstairs-lambda -ldflags "-w -s" ./cmd/upstairs_lambda/main.go
 	zip -j -qq ./bin/upstairs-lambda.zip ./bin/upstairs-lambda
 
+build-daily-data-local:
+	GOARCH=arm GOOS=linux GOARM=5 go build -v -o ./cmd/local/bin/daily-data -ldflags "-w -s" ./cmd/local/daily_data/main.go
+
+build-sense-hat-sync-local:
+	GOARCH=arm GOOS=linux GOARM=5 go build -v -o ./cmd/local/bin/sense-hat-sync -ldflags "-w -s" ./cmd/local/sense_hat_sync/main.go
+
+build-thermostat-local:
+	GOARCH=arm GOOS=linux GOARM=5 go build -v -o ./cmd/local/bin/thermostat -ldflags "-w -s" ./cmd/local/thermostat/main.go
+
+build-weather-local:
+	GOARCH=arm GOOS=linux GOARM=5 go build -v -o ./cmd/local/bin/weather -ldflags "-w -s" ./cmd/local/weather/main.go
+
 build-all: build-daily-data-lambda build-thermostat-lambda build-weather-lambda build-upstairs-lambda
+build-local: build-sense-hat-sync-local build-daily-data-local build-thermostat-local build-weather-local
 
 # todo use goreleaser
 deploy-daily-data-lambda:

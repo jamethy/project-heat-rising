@@ -12,6 +12,7 @@ import (
 )
 
 type AppConfig struct {
+	Lambda  string
 	DB      db.Config
 	Weather weather.Config
 }
@@ -35,7 +36,13 @@ func main() {
 
 	w := weather.New(config.Weather)
 
-	lambda.Start(func(ctx context.Context) error {
-		return task.DailyData(ctx, d, w)
-	})
+	if config.Lambda == "TRUE" {
+		lambda.Start(func(ctx context.Context) error {
+			return task.Weather(ctx, d, w)
+		})
+	} else {
+		if err := task.Weather(context.Background(), d, w); err != nil {
+			log.Fatal("Error with weather: ", err)
+		}
+	}
 }

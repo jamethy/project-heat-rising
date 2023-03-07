@@ -9,8 +9,10 @@ resource aws_lambda_function thermostat {
   runtime = "go1.x"
   handler = "thermostat-lambda"
 
-  timeout     = "30"  // seconds
-  memory_size = "128" // mb
+  timeout = "30"
+  // seconds
+  memory_size = "128"
+  // mb
 
   role = aws_iam_role.general_lambda.arn
 
@@ -18,11 +20,13 @@ resource aws_lambda_function thermostat {
 
   environment {
     variables = {
+      LAMBDA            = "TRUE"
       CARRIER_USERNAME  = var.carrier_username
       CARRIER_PASSWORD  = var.carrier_password
       DATABASE_URL      = var.database_url
       DATABASE_USERNAME = var.database_username
       DATABASE_PASSWORD = var.database_password
+      CACHE_TIME        = timestamp()
     }
   }
 }
@@ -35,7 +39,8 @@ resource aws_cloudwatch_log_group thermostat {
 
 resource aws_cloudwatch_event_rule thermostat {
   name                = "${local.prefix}-thermostat"
-  schedule_expression = "cron(* * * * ? *)" // Every minute
+  schedule_expression = "cron(* * * * ? *)"
+  // Every minute
 }
 
 resource aws_cloudwatch_event_target thermostat_target {
