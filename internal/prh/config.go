@@ -6,6 +6,7 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
 	"github.com/jamethy/project-rising-heat/internal/weather"
+	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -36,43 +37,19 @@ func ReadConfigFile(filePath string) (Config, error) {
 }
 
 func GetDefaultConfigFilePath() string {
-	configDir, err := getConfigDir()
-	if err != nil {
-		fmt.Println("Failed to get config dir! Using ~/.config - ", err)
-		configDir = "~/.config"
+	if runtime.GOOS != "linux" {
+		log.Fatalln("only linux is supported")
 	}
-	return configDir + "/project-rising-heat.json"
-}
 
-func getConfigDir() (string, error) {
-	switch runtime.GOOS {
-	case "linux":
-		dir := os.Getenv("XDG_CONFIG_HOME")
-		if dir == "" {
-			usr, err := user.Current()
-			if err != nil {
-				return "", err
-			}
-			dir = filepath.Join(usr.HomeDir, ".config")
-		}
-		return dir, nil
-	case "windows":
-		dir := os.Getenv("APPDATA")
-		if dir == "" {
-			usr, err := user.Current()
-			if err != nil {
-				return "", err
-			}
-			dir = filepath.Join(usr.HomeDir, "AppData", "Roaming")
-		}
-		return dir, nil
-	case "darwin": // macOS
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
 		usr, err := user.Current()
 		if err != nil {
-			return "", err
+			fmt.Println("Failed to get config dir! Using ~/.config - ", err)
+			configDir = "~"
 		}
-		return filepath.Join(usr.HomeDir, "Library", "Preferences"), nil
-	default:
-		return "", fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		configDir = filepath.Join(usr.HomeDir, ".config")
 	}
+
+	return configDir + "/project-rising-heat.json"
 }

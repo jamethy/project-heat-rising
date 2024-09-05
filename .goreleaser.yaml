@@ -1,4 +1,4 @@
-# Make sure to check the documentation at https://goreleaser.com
+# goreleaser documentation https://goreleaser.com/customization/
 version: 2
 
 before:
@@ -6,10 +6,16 @@ before:
     - go mod tidy
 
 builds:
-  - env:
+  -
+    main: ./cmd/project-rising-heat
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
+      # note, there are places that assume linux, such as prh/config.go
+    goarch:
+      - arm # for raspberryPi
+      - amd64 # for local
 
 archives:
   - format: tar.gz

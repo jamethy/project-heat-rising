@@ -3,10 +3,8 @@ module github.com/jamethy/project-rising-heat
 go 1.23
 
 require (
-	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/google/go-querystring v1.1.0
-	github.com/jamesburns-rts/go-env v1.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.21.1
 	github.com/spf13/cobra v1.8.1
