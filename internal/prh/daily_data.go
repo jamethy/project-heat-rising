@@ -1,4 +1,4 @@
-package task
+package prh
 
 import (
 	"context"
@@ -17,7 +17,14 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
 
-func DailyData(ctx context.Context, d *sql.DB, w weather.Client) error {
+func DailyData(ctx context.Context, dbConfig db.Config, weatherClientConfig weather.Config) error {
+
+	d, err := db.Connect(dbConfig)
+	if err != nil {
+		return fmt.Errorf("failed to connected to database: %w", err)
+	}
+
+	w := weather.New(weatherClientConfig)
 
 	if err := CreateToday(ctx, d, w); err != nil {
 		return err

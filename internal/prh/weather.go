@@ -1,8 +1,9 @@
-package task
+package prh
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
+	"github.com/jamethy/project-rising-heat/internal/db"
 	"log"
 
 	"github.com/jamethy/project-rising-heat/internal/util"
@@ -10,8 +11,15 @@ import (
 	"github.com/volatiletech/sqlboiler/boil"
 )
 
-func Weather(ctx context.Context, d *sql.DB, w weather.Client) error {
-	wrec, err := w.CreateDBRecord(ctx)
+func Weather(ctx context.Context, dbConfig db.Config, weatherConfig weather.Config) error {
+	d, err := db.Connect(dbConfig)
+	if err != nil {
+		return fmt.Errorf("failed to connected to database: %w", err)
+	}
+
+	w := weather.New(weatherConfig)
+
+	wrec, err := w.GetCurrentWeather(ctx)
 	if err != nil {
 		return err
 	}

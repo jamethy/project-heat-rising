@@ -1,8 +1,8 @@
-package task
+package prh
 
 import (
 	"context"
-	"database/sql"
+	"github.com/jamethy/project-rising-heat/internal/db"
 	"log"
 
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
@@ -10,7 +10,14 @@ import (
 	"github.com/volatiletech/sqlboiler/boil"
 )
 
-func Thermostat(ctx context.Context, d *sql.DB, t thermostat.Client) error {
+func Thermostat(ctx context.Context, dbConfig db.Config, thermostatClientConfig thermostat.Config) error {
+	d, err := db.Connect(dbConfig)
+	if err != nil {
+		log.Fatal("failed to connected to database: ", err)
+	}
+
+	t := thermostat.New(thermostatClientConfig)
+
 	trec, err := t.CreateDBRecord(ctx)
 	if err != nil {
 		return err

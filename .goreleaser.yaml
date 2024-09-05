@@ -1,0 +1,18 @@
+# Make sure to check the documentation at https://goreleaser.com
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+
+archives:
+  - format: tar.gz
+
+changelog:
+  sort: asc

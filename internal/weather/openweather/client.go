@@ -57,7 +57,7 @@ func (c *Client) GetCurrent(ctx context.Context, params GetParams) (*OneCall, er
 	return &oneCall, nil
 }
 
-func (c *Client) CreateDBRecord(ctx context.Context) (*db.Weather, error) {
+func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 
 	// checked earlier
 	lat, _ := strconv.ParseFloat(c.config.Latitude, 10)

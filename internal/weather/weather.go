@@ -11,7 +11,7 @@ import (
 
 type (
 	Provider interface {
-		CreateDBRecord(ctx context.Context) (*db.Weather, error)
+		GetCurrentWeather(ctx context.Context) (*db.Weather, error)
 		CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error)
 	}
 
@@ -38,9 +38,9 @@ func New(config Config) (c Client) {
 	return c
 }
 
-func (c *Client) CreateDBRecord(ctx context.Context) (*db.Weather, error) {
+func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 	for _, p := range c.providers {
-		if r, err := p.CreateDBRecord(ctx); err != nil {
+		if r, err := p.GetCurrentWeather(ctx); err != nil {
 			fmt.Printf("problem getting weather: %s", err)
 		} else {
 			return r, nil

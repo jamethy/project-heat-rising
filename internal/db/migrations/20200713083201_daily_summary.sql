@@ -1,3 +1,4 @@
+-- +goose Up
 alter table prh.daily_data
     add column summary_date    timestamp,
     add column bed_time_temp   float(8),
@@ -18,5 +19,23 @@ alter table prh.daily_data
     add column cloud_avg       float(8),
     add column cloud_sum       float(8);
 
-
-grant update on prh.daily_data to prhapp;
+-- +goose Down
+alter table prh.daily_data
+    drop column summary_date,
+    drop column bed_time_temp,
+    drop column fan_on,
+    drop column temperature_max,
+    drop column temperature_avg,
+    drop column temperature_sum,
+    drop column feels_like_max,
+    drop column feels_like_avg,
+    drop column feels_like_sum,
+    drop column uv_max,
+    drop column uv_avg,
+    drop column uv_sum,
+    drop column rain_max,
+    drop column rain_avg,
+    drop column rain_sum,
+    drop column cloud_max,
+    drop column cloud_avg,
+    drop column cloud_sum;
