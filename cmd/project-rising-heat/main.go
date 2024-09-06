@@ -5,9 +5,9 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/prh"
 	"github.com/spf13/cobra"
+	"io"
 	"log"
 	"log/slog"
-	"os"
 	"strings"
 )
 
@@ -51,7 +51,7 @@ func setupCommand() *cobra.Command {
 		Use:   "project-rising-heat <command>",
 		Short: "A set of commands for...",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			setupLogger(cmdFlags.logLevel)
+			setupLogger(cmd.OutOrStdout(), cmdFlags.logLevel)
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -128,8 +128,9 @@ func setupCommand() *cobra.Command {
 	var versionCommand = &cobra.Command{
 		Use:   "version",
 		Short: "Prints the version string",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(version)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			_, err := cmd.OutOrStdout().Write([]byte(version + "\n"))
+			return err
 		},
 	}
 
@@ -151,7 +152,7 @@ func setupCommand() *cobra.Command {
 var version = "unknown" // filled in by goreleaser
 
 // the logger is primarily used for the polling subcommands since they are run automatically
-func setupLogger(level string) {
+func setupLogger(w io.Writer, level string) {
 	slogLevel := slog.LevelInfo
 	switch strings.ToLower(level) {
 	case "debug":
@@ -164,7 +165,7 @@ func setupLogger(level string) {
 		slogLevel = slog.LevelError
 	}
 
-	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	h := slog.NewJSONHandler(w, &slog.HandlerOptions{
 		Level: slogLevel,
 	})
 
