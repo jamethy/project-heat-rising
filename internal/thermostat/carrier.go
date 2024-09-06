@@ -14,7 +14,6 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
-	"github.com/jamethy/project-rising-heat/internal/util/ptr"
 )
 
 // Carrier APIs were scraped from https://www.carrier.com/residential/en/us/for-owners/controller-remote-access/
@@ -389,8 +388,8 @@ func (c *carrier) GetSummary(ctx context.Context) (*CarrierSummary, error) {
 
 	b, err := json.Marshal(CarrierRequest{
 		Selection: SummarySelection{
-			SelectionType:          ptr.Str("registered"),
-			IncludeEquipmentStatus: ptr.True(),
+			SelectionType:          util.Ptr("registered"),
+			IncludeEquipmentStatus: util.Ptr(true),
 		},
 	})
 	if err != nil {

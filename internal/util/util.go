@@ -1,8 +1,7 @@
+// Package util: I never know where to put this stuff
 package util
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/url"
@@ -53,14 +52,4 @@ func Unptr[T any](t *T) T {
 	}
 	var tt T
 	return tt
-}
-
-func PrettyPrint(j any) {
-	b, err := json.MarshalIndent(j, "", "  ")
-	if err != nil {
-		slog.Warn("failed to marshal json to prettier", "err", err)
-		return
-	}
-
-	fmt.Println(string(b))
 }

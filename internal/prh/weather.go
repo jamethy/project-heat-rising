@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"log"
+	"log/slog"
 
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/weather"
@@ -29,6 +30,7 @@ func Weather(ctx context.Context, dbConfig db.Config, weatherConfig weather.Conf
 	if err != nil {
 		log.Fatal("failed to write to database: ", err)
 	}
-	util.PrettyPrint(wrec)
+
+	slog.Info("recorded weather data", "data", wrec)
 	return nil
 }

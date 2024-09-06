@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"log"
+	"log/slog"
 
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
 	"github.com/jamethy/project-rising-heat/internal/util"
@@ -31,6 +32,6 @@ func Thermostat(ctx context.Context, dbConfig db.Config, thermostatClientConfig 
 		log.Fatal("failed to write to database: ", err)
 	}
 
-	util.PrettyPrint(trec)
+	slog.Info("thermostat data recorded", "data", trec)
 	return nil
 }

@@ -3,12 +3,12 @@ package openweather
 import (
 	"context"
 	"fmt"
+	"github.com/jamethy/project-rising-heat/internal/util"
 	"net/http"
 	"time"
 
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
-	"github.com/jamethy/project-rising-heat/internal/util/ptr"
 )
 
 //https://openweathermap.org/current
@@ -61,8 +61,8 @@ func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 	w, err := c.GetCurrent(ctx, GetParams{
 		Lat:     &c.config.Latitude,
 		Lon:     &c.config.Longitude,
-		Units:   ptr.Str("imperial"),
-		Exclude: ptr.Str("minutely,hourly,daily"),
+		Units:   util.Ptr("imperial"),
+		Exclude: util.Ptr("minutely,hourly,daily"),
 	})
 	if err != nil {
 		return nil, err
@@ -89,8 +89,8 @@ func (c *Client) CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error
 	w, err := c.GetCurrent(ctx, GetParams{
 		Lat:     &c.config.Latitude,
 		Lon:     &c.config.Longitude,
-		Units:   ptr.Str("imperial"),
-		Exclude: ptr.Str("minutely,hourly,daily"),
+		Units:   util.Ptr("imperial"),
+		Exclude: util.Ptr("minutely,hourly,daily"),
 	})
 	if err != nil {
 		return nil, err
