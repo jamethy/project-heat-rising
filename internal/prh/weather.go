@@ -8,14 +8,16 @@ import (
 
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/weather"
-	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 func Weather(ctx context.Context, dbConfig db.Config, weatherConfig weather.Config) error {
+
 	d, err := db.Connect(dbConfig)
 	if err != nil {
-		return fmt.Errorf("failed to connected to database: %w", err)
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
+	defer util.SafeClose(d)
 
 	w := weather.New(weatherConfig)
 

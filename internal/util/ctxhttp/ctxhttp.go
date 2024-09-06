@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
-	"golang.org/x/net/context/ctxhttp"
 	"github.com/jamethy/project-rising-heat/internal/util"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 type GetParams struct {
@@ -23,7 +23,7 @@ type PostParams struct {
 	Ctx         context.Context
 	HttpClient  *http.Client
 	URL         string
-	Body       interface{}
+	Body        interface{}
 	Query       interface{}
 	Destination interface{}
 }
@@ -45,7 +45,7 @@ func Get(params GetParams) (*http.Response, error) {
 	defer util.SafeClose(res.Body)
 
 	if res.StatusCode != 200 {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return res, fmt.Errorf("non-200 response: %d - %s", res.StatusCode, string(b))
 	}
 	err = json.NewDecoder(res.Body).Decode(params.Destination)

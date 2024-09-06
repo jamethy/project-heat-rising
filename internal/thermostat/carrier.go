@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,12 +14,13 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
 	"github.com/jamethy/project-rising-heat/internal/util/ptr"
-	"github.com/volatiletech/null"
 )
 
+// Carrier APIs were scraped from https://www.carrier.com/residential/en/us/for-owners/controller-remote-access/
+// Namely just a call to https://www.myhome.carrier.com/home/api/1/thermostatSummary
 type (
 	CarrierRequest struct {
-		Selection interface{} `json:"selection"`
+		Selection any `json:"selection"`
 	}
 
 	Selection struct {
@@ -147,10 +148,12 @@ type (
 			Message string `json:"message"`
 		} `json:"status"`
 	}
+)
 
+type (
 	CarrierLogin struct {
-		Username string `url:"userName" env:"CARRIER_USERNAME"`
-		Password string `url:"password" env:"CARRIER_PASSWORD"`
+		Username string `url:"userName" json:"username"`
+		Password string `url:"password" json:"password"`
 	}
 
 	CarrierToken struct {
@@ -168,8 +171,8 @@ type (
 
 	CarrierConfig struct {
 		CarrierLogin
-		BaseUrl string        `env:"CARRIER_BASE_URL"`
-		Timeout time.Duration `env:"CARRIER_TIMEOUT"`
+		BaseUrl string        `json:"baseUrl"`
+		Timeout time.Duration `json:"timeout"`
 	}
 
 	carrier struct {
@@ -258,7 +261,7 @@ func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie
 	}
 	defer util.SafeClose(res.Body)
 	if res.StatusCode != 200 {
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read response body: %w", err)
 		}
@@ -316,7 +319,7 @@ func (c *carrier) RefreshToken(ctx context.Context) (*CarrierToken, error) {
 	}
 	defer util.SafeClose(res.Body)
 	if res.StatusCode != 200 {
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read response body: %w", err)
 		}
@@ -436,18 +439,18 @@ func (c *carrier) CreateDBRecord(ctx context.Context) (*db.Thermostat, error) {
 	t := data.ThermostatList[0].Runtime
 
 	return &db.Thermostat{
-		Provider:     null.StringFrom("Carrier"),
-		ThermostatID: null.StringFrom(thermostatId),
-		ActualTemp:   null.Float32From(c.toF(t.ActualTemperature)),
-		Humidity:     null.Float32From(float32(t.ActualHumidity)),
-		TargetCool:   null.Float32From(c.toF(t.DesiredCool)),
-		TargetHeat:   null.Float32From(c.toF(t.DesiredHeat)),
-		IsHeating:    null.BoolFrom(isHeating),
-		IsCooling:    null.BoolFrom(isCooling),
+		Provider:     "Carrier",
+		ThermostatID: thermostatId,
+		ActualTemp:   c.toF(t.ActualTemperature),
+		Humidity:     float64(t.ActualHumidity),
+		TargetCool:   c.toF(t.DesiredCool),
+		TargetHeat:   c.toF(t.DesiredHeat),
+		IsHeating:    isHeating,
+		IsCooling:    isCooling,
 		Timestamp:    time.Now(),
 	}, nil
 }
 
-func (c *carrier) toF(carrierTemp int) float32 {
-	return float32(carrierTemp) / 10.0
+func (c *carrier) toF(carrierTemp int) float64 {
+	return float64(carrierTemp) / 10.0
 }

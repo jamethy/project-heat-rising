@@ -14,7 +14,7 @@ type (
 	}
 
 	Config struct {
-		Carrier CarrierConfig
+		Carrier CarrierConfig `json:"carrier"`
 	}
 
 	Client struct {

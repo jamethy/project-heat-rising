@@ -16,7 +16,7 @@ type (
 	}
 
 	Config struct {
-		OpenWeather openweather.Config
+		OpenWeather openweather.Config `json:"openWeather"`
 	}
 	Client struct {
 		config    Config

@@ -15,9 +15,9 @@ import (
 )
 
 type Config struct {
-	DB               db.Config
-	WeatherProvider  weather.Config
-	ThermostatClient thermostat.Config
+	DB               db.Config         `json:"db"`
+	WeatherProvider  weather.Config    `json:"weatherProvider"`
+	ThermostatClient thermostat.Config `json:"thermostat"`
 }
 
 var DefaultConfig = Config{

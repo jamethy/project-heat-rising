@@ -3,6 +3,7 @@ package db
 import (
 	"embed"
 	"fmt"
+	"github.com/jamethy/project-rising-heat/internal/util"
 	"github.com/pressly/goose/v3"
 )
 
@@ -15,6 +16,7 @@ func Migrate(dbConfig Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
+	defer util.SafeClose(d)
 
 	_ = goose.SetDialect("postgres")
 	goose.SetBaseFS(embeddedMigrations)

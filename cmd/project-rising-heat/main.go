@@ -37,6 +37,8 @@ func setupCommand() *cobra.Command {
 			if err := db.Migrate(config.DB); err != nil {
 				return fmt.Errorf("failed to run migrations: %w", err)
 			}
+		} else {
+			fmt.Println("skipping migrations")
 		}
 		return nil
 	}
@@ -50,13 +52,22 @@ func setupCommand() *cobra.Command {
 	}
 
 	rootCmd.PersistentFlags().StringVar(&cmdFlags.configPath, "config-file", prh.GetDefaultConfigFilePath(), "json file with credentials and stuff")
-	rootCmd.Flags().BoolVar(&cmdFlags.skipMigration, "skip-migrations", true, "Skip the database migrations") // I know, it's not used everywhere, but it's fine.
+	rootCmd.Flags().BoolVar(&cmdFlags.skipMigration, "skip-migrations", false, "Skip the database migrations") // I know, it's not used everywhere, but it's fine.
 
 	var createConfigCmd = &cobra.Command{
 		Use:   "create-config",
 		Short: "",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return prh.ReadConfigFromUserIntoFile(cmd.InOrStdin(), cmdFlags.configPath)
+		},
+	}
+
+	var migrationsCmd = &cobra.Command{
+		Use:     "migrations",
+		Short:   "",
+		PreRunE: joinPreRuns(readConfigPreRun, migrationPreRun),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
 		},
 	}
 
@@ -116,6 +127,7 @@ func setupCommand() *cobra.Command {
 	cobra.EnableCommandSorting = false
 	rootCmd.AddCommand(
 		createConfigCmd,
+		migrationsCmd,
 		installScheduleCmd,
 		pollSenseHatCmd,
 		pollWeatherCmd,

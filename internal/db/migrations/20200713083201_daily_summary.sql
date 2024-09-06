@@ -1,41 +1,31 @@
 -- +goose Up
-alter table prh.daily_data
-    add column summary_date    timestamp,
-    add column bed_time_temp   float(8),
-    add column fan_on          text,
-    add column temperature_max float(8),
-    add column temperature_avg float(8),
-    add column temperature_sum float(8),
-    add column feels_like_max  float(8),
-    add column feels_like_avg  float(8),
-    add column feels_like_sum  float(8),
-    add column uv_max          float(8),
-    add column uv_avg          float(8),
-    add column uv_sum          float(8),
-    add column rain_max        float(8),
-    add column rain_avg        float(8),
-    add column rain_sum        float(8),
-    add column cloud_max       float(8),
-    add column cloud_avg       float(8),
-    add column cloud_sum       float(8);
+create table if not exists prh.daily_data
+(
+    id              serial primary key,
+    created_at      timestamp not null default now(),
+    date            date      not null,
+    sunrise         timestamp not null,
+    sunset          timestamp not null,
+    summary_date    timestamp not null,
+    bed_time_temp   float     not null,
+    fan_on          text      not null,
+    temperature_max float     not null,
+    temperature_avg float     not null,
+    temperature_sum float     not null,
+    feels_like_max  float     not null,
+    feels_like_avg  float     not null,
+    feels_like_sum  float     not null,
+    uv_max          float     not null,
+    uv_avg          float     not null,
+    uv_sum          float     not null,
+    rain_max        float     not null,
+    rain_avg        float     not null,
+    rain_sum        float     not null,
+    cloud_max       float     not null,
+    cloud_avg       float     not null,
+    cloud_sum       float     not null
+);
+
 
 -- +goose Down
-alter table prh.daily_data
-    drop column summary_date,
-    drop column bed_time_temp,
-    drop column fan_on,
-    drop column temperature_max,
-    drop column temperature_avg,
-    drop column temperature_sum,
-    drop column feels_like_max,
-    drop column feels_like_avg,
-    drop column feels_like_sum,
-    drop column uv_max,
-    drop column uv_avg,
-    drop column uv_sum,
-    drop column rain_max,
-    drop column rain_avg,
-    drop column rain_sum,
-    drop column cloud_max,
-    drop column cloud_avg,
-    drop column cloud_sum;
+drop table if exists prh.daily_data;

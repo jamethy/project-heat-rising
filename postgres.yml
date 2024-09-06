@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+    db:
+        image: postgres:16
+        volumes:
+            - project-rising-heat-db:/var/lib/postgresql/data/
+        environment:
+            # If these values are changed, you should probably update those in these files too:
+            #  - internal/db/sqlboiler.toml
+            #  - internal/db/db.go DefaultConfig
+            - POSTGRES_DB=localdb
+            - POSTGRES_USER=localuser
+            - POSTGRES_PASSWORD=secret
+        ports:
+            - "5432:5432"
+        command: ["postgres", "-c", "log_statement=all"]
+volumes:
+  project-rising-heat-db:
+

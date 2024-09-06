@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/volatiletech/sqlboiler/boil"
 	"strings"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type (
@@ -23,7 +25,7 @@ type (
 var DefaultConfig = Config{
 	Host:       "localhost",
 	Port:       5432,
-	Name:       "localuser",
+	Name:       "localdb",
 	Username:   "localuser",
 	Password:   "secret",
 	SSLDisable: false,

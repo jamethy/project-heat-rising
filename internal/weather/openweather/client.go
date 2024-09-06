@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
 	"github.com/jamethy/project-rising-heat/internal/util/ptr"
-	"github.com/volatiletech/null"
 )
 
 //https://openweathermap.org/current
@@ -39,7 +37,7 @@ type GetParams struct {
 }
 
 func (c *Client) GetCurrent(ctx context.Context, params GetParams) (*OneCall, error) {
-	url := c.config.BaseUrl + "/onecall"
+	url := c.config.BaseUrl + "/data/2.5/onecall"
 	params.APIKey = &c.config.APIKey
 	var oneCall OneCall
 
@@ -60,12 +58,9 @@ func (c *Client) GetCurrent(ctx context.Context, params GetParams) (*OneCall, er
 func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 
 	// checked earlier
-	lat, _ := strconv.ParseFloat(c.config.Latitude, 10)
-	lon, _ := strconv.ParseFloat(c.config.Longitude, 10)
-
 	w, err := c.GetCurrent(ctx, GetParams{
-		Lat:     &lat,
-		Lon:     &lon,
+		Lat:     &c.config.Latitude,
+		Lon:     &c.config.Longitude,
 		Units:   ptr.Str("imperial"),
 		Exclude: ptr.Str("minutely,hourly,daily"),
 	})
@@ -74,30 +69,26 @@ func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 	}
 
 	return &db.Weather{
-		Provider:           null.StringFrom("OpenWeatherMaps"),
-		Temperature:        null.Float32FromPtr(w.Current.Temp),
-		FeelsLike:          null.Float32FromPtr(w.Current.FeelsLike),
-		Pressure:           null.Float32FromPtr(w.Current.Pressure),
-		Humidity:           null.Float32FromPtr(w.Current.Humidity),
-		WindSpeed:          null.Float32FromPtr(w.Current.WindSpeed),
-		WindDirection:      null.Float32FromPtr(w.Current.WindDeg),
-		Clouds:             null.Float32FromPtr(w.Current.Clouds),
-		UvIndex:            null.Float32FromPtr(w.Current.Uvi),
-		RainLevel:          null.Float32FromPtr(w.GetRainLevel()),
-		WeatherDescription: null.StringFromPtr(w.GetWeatherDescription()),
+		Provider:           "OpenWeatherMaps",
+		Temperature:        w.Current.Temp,
+		FeelsLike:          w.Current.FeelsLike,
+		Pressure:           w.Current.Pressure,
+		Humidity:           w.Current.Humidity,
+		WindSpeed:          w.Current.WindSpeed,
+		WindDirection:      w.Current.WindDeg,
+		Clouds:             w.Current.Clouds,
+		UvIndex:            w.Current.Uvi,
+		RainLevel:          w.GetRainLevel(),
+		WeatherDescription: w.GetWeatherDescription(),
 		Timestamp:          time.Now(),
 	}, nil
 }
 
 func (c *Client) CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error) {
 
-	// checked earlier
-	lat, _ := strconv.ParseFloat(c.config.Latitude, 10)
-	lon, _ := strconv.ParseFloat(c.config.Longitude, 10)
-
 	w, err := c.GetCurrent(ctx, GetParams{
-		Lat:     &lat,
-		Lon:     &lon,
+		Lat:     &c.config.Latitude,
+		Lon:     &c.config.Longitude,
 		Units:   ptr.Str("imperial"),
 		Exclude: ptr.Str("minutely,hourly,daily"),
 	})
@@ -107,7 +98,7 @@ func (c *Client) CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error
 
 	return &db.DailyDatum{
 		Date:    time.Now(),
-		Sunrise: null.TimeFromPtr(w.GetSunrise()),
-		Sunset:  null.TimeFromPtr(w.GetSunset()),
+		Sunrise: *w.GetSunrise(), // todo check
+		Sunset:  *w.GetSunset(),
 	}, nil
 }
