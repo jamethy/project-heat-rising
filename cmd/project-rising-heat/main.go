@@ -9,6 +9,13 @@ import (
 )
 
 func main() {
+	cmd := setupCommand()
+	if err := cmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func setupCommand() *cobra.Command {
 
 	cmdFlags := struct {
 		configPath    string
@@ -117,9 +124,7 @@ func main() {
 		versionCommand,
 	)
 
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
-	}
+	return rootCmd
 }
 
 var version = "unknown" // filled in by goreleaser
