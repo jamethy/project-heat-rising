@@ -9,14 +9,14 @@ import (
 
 type (
 	Config struct {
-		Host       string `env:"PRH_DB_HOST"`
-		Port       int    `env:"PRH_DB_PORT"`
-		Name       string `env:"PRH_DB_NAME"`
-		Username   string `env:"PRH_DB_USERNAME"`
-		Password   string `env:"PRH_DB_PASSWORD"`
-		SSLDisable bool   `env:"PRH_DB_DISABLE_SSL"`
-		LogSQL     bool   `env:"PRH_DB_LOG_SQL"`
-		Migrate    bool   `env:"PRH_DB_MIGRATE_ENABLED"`
+		Host       string `json:"host"`
+		Port       int    `json:"port"`
+		Name       string `json:"name"`
+		Username   string `json:"username"`
+		Password   string `json:"password"`
+		SSLDisable bool   `json:"sslDisable"`
+		LogSQL     bool   `json:"logSql"`
+		Migrate    bool   `json:"migrate"`
 	}
 )
 

@@ -6,6 +6,7 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/thermostat"
 	"github.com/jamethy/project-rising-heat/internal/weather"
+	"io"
 	"log"
 	"os"
 	"os/user"
@@ -19,11 +20,30 @@ type Config struct {
 	ThermostatClient thermostat.Config
 }
 
-func ReadConfigFile(filePath string) (Config, error) {
-	config := Config{
-		DB:              db.DefaultConfig,
-		WeatherProvider: weather.DefaultConfig,
+var DefaultConfig = Config{
+	DB:               db.DefaultConfig,
+	WeatherProvider:  weather.DefaultConfig,
+	ThermostatClient: thermostat.DefaultConfig,
+}
+
+func ReadConfigFromUserIntoFile(i io.Reader, filePath string) error {
+	// todo actually read important values from user
+	config, _ := ReadConfigFile(filePath)
+	// error is ignored because we want to use defaults in case of missing file
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
 	}
+
+	if err = json.NewEncoder(f).Encode(config); err != nil {
+		return fmt.Errorf("failed to marshal json: %w", err)
+	}
+	return nil
+}
+
+func ReadConfigFile(filePath string) (Config, error) {
+	config := DefaultConfig
 
 	f, err := os.Open(filePath)
 	if err != nil {
