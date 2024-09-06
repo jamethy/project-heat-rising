@@ -3,6 +3,7 @@ package weather
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jamethy/project-rising-heat/internal/db"
@@ -41,7 +42,7 @@ func New(config Config) (c Client) {
 func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 	for _, p := range c.providers {
 		if r, err := p.GetCurrentWeather(ctx); err != nil {
-			fmt.Printf("problem getting weather: %s", err)
+			slog.Error("problem getting weather", "err", err)
 		} else {
 			return r, nil
 		}
@@ -52,7 +53,7 @@ func (c *Client) GetCurrentWeather(ctx context.Context) (*db.Weather, error) {
 func (c *Client) CreateDailyDBRecord(ctx context.Context) (*db.DailyDatum, error) {
 	for _, p := range c.providers {
 		if r, err := p.CreateDailyDBRecord(ctx); err != nil {
-			fmt.Printf("problem getting daily record: %s", err)
+			slog.Error("problem getting daily record", "err", err)
 		} else {
 			return r, nil
 		}

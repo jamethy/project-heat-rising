@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -185,9 +186,9 @@ type (
 )
 
 func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
-	fmt.Println("Authorizing request...")
+	slog.Debug("Authorizing request carrier...")
 	if c.cookies == nil {
-		fmt.Println("Existing auth cookie not found, logging in")
+		slog.Debug("Existing auth cookie not found, logging in")
 		var err error
 		c.cookies, err = c.Login(req.Context(), c.config.CarrierLogin)
 		if err != nil {
@@ -196,7 +197,7 @@ func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	if c.tokens == nil || c.tokenExpires.Before(time.Now()) {
-		fmt.Printf("Tokens not found or expired: %t\n", c.tokens == nil)
+		slog.Debug("Tokens not found or expired", "tokens-nil", c.tokens == nil)
 		var err error
 		c.tokens, err = c.RefreshToken(req.Context())
 		if err != nil {
@@ -215,7 +216,6 @@ func (c *carrier) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	req.Header.Set("Authorization", fmt.Sprintf("%s %s", c.tokens.TokenType, c.tokens.AccessToken))
 
-	fmt.Println("making an authorized call: " + req.RequestURI)
 	return http.DefaultTransport.RoundTrip(req)
 }
 
@@ -238,7 +238,6 @@ func (c *CarrierConfig) IsValid() bool {
 
 func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie, error) {
 	uri := c.config.BaseUrl + "/login/"
-	fmt.Println("carrier: Calling /login")
 
 	uri, err := util.AddQueryParameters(uri, login)
 	if err != nil {
@@ -272,7 +271,6 @@ func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie
 }
 
 func (c *carrier) RefreshToken(ctx context.Context) (*CarrierToken, error) {
-	fmt.Println("carrier: Refresh /token")
 	if c.cookies == nil {
 		return nil, fmt.Errorf("need cookies first")
 	}

@@ -3,6 +3,7 @@ package thermostat
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jamethy/project-rising-heat/internal/db"
@@ -39,7 +40,7 @@ func New(config Config) (c Client) {
 func (c *Client) CreateDBRecord(ctx context.Context) (*db.Thermostat, error) {
 	for _, p := range c.providers {
 		if r, err := p.CreateDBRecord(ctx); err != nil {
-			fmt.Printf("problem getting thermostat: %s", err)
+			slog.Error("problem getting thermostat", "err", err)
 		} else {
 			return r, nil
 		}

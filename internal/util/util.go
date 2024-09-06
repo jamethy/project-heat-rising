@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/url"
 	"reflect"
 	"runtime/debug"
@@ -14,7 +14,7 @@ import (
 
 // AddQueryParameters adds the parameters in opt as URL query parameters to s. opt
 // must be a struct whose fields may contain "url" tags.
-func AddQueryParameters(s string, opt interface{}) (string, error) {
+func AddQueryParameters(s string, opt any) (string, error) {
 	v := reflect.ValueOf(opt)
 	if v.Kind() == reflect.Ptr && v.IsNil() {
 		return s, nil
@@ -37,16 +37,28 @@ func AddQueryParameters(s string, opt interface{}) (string, error) {
 func SafeClose(closer io.Closer) {
 	if closer != nil {
 		if err := closer.Close(); err != nil {
-			log.Println("failed to close: ", err)
+			slog.Warn("failed to close closer", "err", err)
 			debug.PrintStack()
 		}
 	}
 }
 
-func PrettyPrint(j interface{}) {
+func Ptr[T any](t T) *T {
+	return &t
+}
+
+func Unptr[T any](t *T) T {
+	if t != nil {
+		return *t
+	}
+	var tt T
+	return tt
+}
+
+func PrettyPrint(j any) {
 	b, err := json.MarshalIndent(j, "", "  ")
 	if err != nil {
-		fmt.Println("failed to marshal json ", err)
+		slog.Warn("failed to marshal json to prettier", "err", err)
 		return
 	}
 

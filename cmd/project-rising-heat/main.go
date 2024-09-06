@@ -6,6 +6,9 @@ import (
 	"github.com/jamethy/project-rising-heat/internal/prh"
 	"github.com/spf13/cobra"
 	"log"
+	"log/slog"
+	"os"
+	"strings"
 )
 
 func main() {
@@ -19,6 +22,7 @@ func setupCommand() *cobra.Command {
 
 	cmdFlags := struct {
 		configPath    string
+		logLevel      string
 		skipMigration bool
 	}{}
 
@@ -38,7 +42,7 @@ func setupCommand() *cobra.Command {
 				return fmt.Errorf("failed to run migrations: %w", err)
 			}
 		} else {
-			fmt.Println("skipping migrations")
+			slog.Debug("skipping migrations")
 		}
 		return nil
 	}
@@ -46,12 +50,17 @@ func setupCommand() *cobra.Command {
 	var rootCmd = &cobra.Command{
 		Use:   "project-rising-heat <command>",
 		Short: "A set of commands for...",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			setupLogger(cmdFlags.logLevel)
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.HelpFunc()(cmd, args)
 		},
 	}
 
 	rootCmd.PersistentFlags().StringVar(&cmdFlags.configPath, "config-file", prh.GetDefaultConfigFilePath(), "json file with credentials and stuff")
+	rootCmd.PersistentFlags().StringVar(&cmdFlags.logLevel, "log-level", "info", "debug, info, warn, or error")
 	rootCmd.Flags().BoolVar(&cmdFlags.skipMigration, "skip-migrations", false, "Skip the database migrations") // I know, it's not used everywhere, but it's fine.
 
 	var createConfigCmd = &cobra.Command{
@@ -140,6 +149,32 @@ func setupCommand() *cobra.Command {
 }
 
 var version = "unknown" // filled in by goreleaser
+
+// the logger is primarily used for the polling subcommands since they are run automatically
+func setupLogger(level string) {
+	slogLevel := slog.LevelInfo
+	switch strings.ToLower(level) {
+	case "debug":
+		slogLevel = slog.LevelDebug
+	case "info":
+		slogLevel = slog.LevelInfo
+	case "warn":
+		slogLevel = slog.LevelWarn
+	case "error":
+		slogLevel = slog.LevelError
+	}
+
+	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slogLevel,
+	})
+
+	l := slog.New(h)
+	l = l.With("app", slog.GroupValue(
+		slog.String("name", "project-rising-heat"),
+		slog.String("version", version),
+	))
+	slog.SetDefault(l)
+}
 
 // PreRunFunc copied from cobra.Command.PreRunE definition
 // just defined for better clarity of joinPreRuns definition

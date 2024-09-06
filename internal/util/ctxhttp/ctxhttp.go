@@ -15,17 +15,17 @@ type GetParams struct {
 	Ctx         context.Context
 	HttpClient  *http.Client
 	URL         string
-	Query       interface{}
-	Destination interface{}
+	Query       any
+	Destination any
 }
 
 type PostParams struct {
 	Ctx         context.Context
 	HttpClient  *http.Client
 	URL         string
-	Body        interface{}
-	Query       interface{}
-	Destination interface{}
+	Body        any
+	Query       any
+	Destination any
 }
 
 func Get(params GetParams) (*http.Response, error) {
