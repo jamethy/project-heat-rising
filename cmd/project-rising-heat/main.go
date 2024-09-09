@@ -12,13 +12,16 @@ import (
 )
 
 func main() {
-	cmd := setupCommand()
+	cmd := setupCommand(prh.ReadConfigFile)
 	if err := cmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func setupCommand() *cobra.Command {
+// made this an interface to make test setup easier
+type configFileReaderFunc func(filePath string) (prh.Config, error)
+
+func setupCommand(readConfigFile configFileReaderFunc) *cobra.Command {
 
 	cmdFlags := struct {
 		configPath    string
@@ -28,7 +31,7 @@ func setupCommand() *cobra.Command {
 
 	var config prh.Config // set if readConfigPreRun put in cmd preRun
 	readConfigPreRun := func(cmd *cobra.Command, args []string) error {
-		cfg, err := prh.ReadConfigFile(cmdFlags.configPath)
+		cfg, err := readConfigFile(cmdFlags.configPath)
 		if err != nil {
 			return fmt.Errorf("failed to read config file: %w", err)
 		}

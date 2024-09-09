@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/volatiletech/sqlboiler/boil"
 	"strings"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -60,6 +61,7 @@ func Connect(config Config) (*sql.DB, error) {
 
 	db.SetMaxOpenConns(1)
 	boil.DebugMode = config.LogSQL
+	boil.SetLocation(time.UTC)
 
 	return db, nil
 }

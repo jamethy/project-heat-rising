@@ -1,0 +1,7 @@
+{
+  "access_token": "definitelyanaccesstoken",
+  "expires_in": 1000,
+  "refresh_token": "refreshrefreshrefresh",
+  "scope": "thermostat stuff",
+  "token_type": "access"
+}

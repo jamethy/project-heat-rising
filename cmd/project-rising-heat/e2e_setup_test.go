@@ -2,12 +2,17 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/jamethy/project-rising-heat/internal/prh"
 	"github.com/ory/dockertest/v3"
+	"github.com/stretchr/testify/assert"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -18,11 +23,19 @@ import (
 
 var testdb *sql.DB
 var config prh.Config
+var ctx = context.Background()
 
 func TestMain(m *testing.M) {
 	beingRunInDocker := os.Getenv("IN_DOCKER") == "1"
 
 	config = prh.DefaultConfig
+
+	mockCarrierAPI := newCarrierMockAPIServer()
+	defer mockCarrierAPI.Close()
+	config.ThermostatClient.Carrier.Username = "carrier_username"
+	config.ThermostatClient.Carrier.Password = "carrier_password"
+	config.ThermostatClient.Carrier.BaseUrl = mockCarrierAPI.URL
+
 	config.DB.Name = "e2e_test"
 	config.DB.SSLDisable = true
 	config.DB.Username = "e2e_username"
@@ -89,14 +102,14 @@ func TestMain(m *testing.M) {
 	}
 
 	// find way to project root directory
-	//for {
-	//	if _, err := os.Stat("internal"); err == nil {
-	//		break
-	//	}
-	//	if err := os.Chdir(".."); err != nil {
-	//		panic(err)
-	//	}
-	//}
+	for {
+		if _, err := os.Stat("cmd"); err == nil {
+			break
+		}
+		if err := os.Chdir(".."); err != nil {
+			panic(err)
+		}
+	}
 
 	// execute setup sql
 	//c, err := os.ReadFile(filepath.Join("internal", "testdata", ".sql"))
@@ -124,11 +137,42 @@ func TestMain(m *testing.M) {
 // stolen from cobra library
 func executeSubCommand(args ...string) (output string, err error) {
 	buf := new(bytes.Buffer)
-	cmd := setupCommand()
+	cmd := setupCommand(func(filePath string) (prh.Config, error) {
+		// todo assert filePath or at least check value
+		return config, nil
+	})
 	cmd.SetOut(buf)
 	cmd.SetErr(buf)
 	cmd.SetArgs(args)
 
 	err = cmd.Execute()
 	return buf.String(), err
+}
+
+// creates a http handler that just returns the json of a file
+// fileName assumes relative to test_data and that the tests are run in repo root (since TestMain navigates there)
+func loadJSONFileHandler(fileName string) http.HandlerFunc {
+	fileName = filepath.Join("cmd", "project-rising-heat", "test_data", fileName)
+
+	f, err := os.Open(fileName)
+	if err != nil {
+		panic(err)
+	}
+	b, err := io.ReadAll(f)
+	if err != nil {
+		panic(err)
+	}
+	return func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write(b)
+	}
+}
+
+func assertWithinASecond(t *testing.T, expected, actual time.Time) {
+	assert.Truef(t, expected.After(actual.Add(-500*time.Millisecond)), "expected is too early: %s", expected.Sub(actual))
+	assert.Truef(t, expected.Before(actual.Add(500*time.Millisecond)), "expected is too late: %s", expected.Sub(actual))
+}
+
+func assertWithinDelta(t *testing.T, expected, actual, delta float64) {
+	assert.Greaterf(t, expected, actual-delta, "expected was too less than actual")
+	assert.Lessf(t, expected, actual+delta, "expected was too greater than actual")
 }

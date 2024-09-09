@@ -1,0 +1,13 @@
+{
+  "thermostatCount": 1,
+  "revisionList": [
+    "900000000000:My home:true:240901110023:240821235150:240907021946:240907021000"
+  ],
+  "statusList": [
+    "900000000000:compCool1,fan"
+  ],
+  "status": {
+    "code": 0,
+    "message": ""
+  }
+}

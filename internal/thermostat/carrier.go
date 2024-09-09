@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"io"
 	"log/slog"
 	"net/http"
@@ -164,11 +165,6 @@ type (
 		TokenType    string `json:"token_type"`
 	}
 
-	CarrierRefreshRequest struct {
-		GrantType string `url:"grant_type"`
-		Code      string `url:"code"`
-	}
-
 	CarrierConfig struct {
 		CarrierLogin
 		BaseUrl string        `json:"baseUrl"`
@@ -238,6 +234,7 @@ func (c *CarrierConfig) IsValid() bool {
 func (c *carrier) Login(ctx context.Context, login CarrierLogin) ([]*http.Cookie, error) {
 	uri := c.config.BaseUrl + "/login/"
 
+	// carrier uses query parameters for their credentials... barf
 	uri, err := util.AddQueryParameters(uri, login)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add query parameters: %w", err)
@@ -288,10 +285,14 @@ func (c *carrier) RefreshToken(ctx context.Context) (*CarrierToken, error) {
 
 	uri := c.config.BaseUrl + "/token"
 
-	r := &CarrierRefreshRequest{
+	var r = struct {
+		GrantType string `url:"grant_type"`
+		Code      string `url:"code"`
+	}{
 		GrantType: "refresh_token",
 		Code:      refreshToken,
 	}
+
 	uri, err := util.AddQueryParameters(uri, r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add query parameters: %w", err)
@@ -444,7 +445,7 @@ func (c *carrier) CreateDBRecord(ctx context.Context) (*db.Thermostat, error) {
 		TargetHeat:   c.toF(t.DesiredHeat),
 		IsHeating:    isHeating,
 		IsCooling:    isCooling,
-		Timestamp:    time.Now(),
+		Timestamp:    time.Now().In(boil.GetLocation()),
 	}, nil
 }
 
