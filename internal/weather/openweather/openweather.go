@@ -2,13 +2,15 @@ package openweather
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/jamethy/project-rising-heat/internal/util"
+	"golang.org/x/net/context/ctxhttp"
+	"io"
 	"net/http"
 	"time"
 
 	"github.com/jamethy/project-rising-heat/internal/db"
-	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
 )
 
 //https://openweathermap.org/current
@@ -37,19 +39,29 @@ type GetParams struct {
 }
 
 func (c *Client) GetCurrent(ctx context.Context, params GetParams) (*OneCall, error) {
-	url := c.config.BaseUrl + "/data/2.5/onecall"
+	uri := c.config.BaseUrl + "/data/2.5/onecall"
 	params.APIKey = &c.config.APIKey
-	var oneCall OneCall
 
-	_, err := ctxhttp.Get(ctxhttp.GetParams{
-		Ctx:         ctx,
-		HttpClient:  c.client,
-		URL:         url,
-		Query:       &params,
-		Destination: &oneCall,
-	})
+	uri, err := util.AddQueryParameters(uri, params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get weather: %w", err)
+		return nil, fmt.Errorf("bad query params: %w", err)
+	}
+
+	res, err := ctxhttp.Get(ctx, c.client, uri)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get: %w", err)
+	}
+	defer util.SafeClose(res.Body)
+
+	if res.StatusCode != 200 {
+		b, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("non-200 response: %d - %s", res.StatusCode, string(b))
+	}
+
+	var oneCall OneCall
+	err = json.NewDecoder(res.Body).Decode(&oneCall)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	return &oneCall, nil

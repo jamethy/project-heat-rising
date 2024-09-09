@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"golang.org/x/net/context/ctxhttp"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/jamethy/project-rising-heat/internal/db"
 	"github.com/jamethy/project-rising-heat/internal/util"
-	"github.com/jamethy/project-rising-heat/internal/util/ctxhttp"
 )
 
 // Carrier APIs were scraped from https://www.carrier.com/residential/en/us/for-owners/controller-remote-access/
@@ -365,20 +365,30 @@ func (c *carrier) GetThermostat(ctx context.Context, id string) (*CarrierRespons
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	var therm CarrierResponse
-	_, err = ctxhttp.Get(ctxhttp.GetParams{
-		Ctx:        ctx,
-		HttpClient: c.client,
-		URL:        uri,
-		Query: &CarrierParams{
-			Format:    "json",
-			JSON:      string(b),
-			Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
-		},
-		Destination: &therm,
+	uri, err = util.AddQueryParameters(uri, &CarrierParams{
+		Format:    "json",
+		JSON:      string(b),
+		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
 	})
 	if err != nil {
-		return &therm, fmt.Errorf("failed to get: %w", err)
+		return nil, fmt.Errorf("bad query params: %w", err)
+	}
+
+	res, err := ctxhttp.Get(ctx, c.client, uri)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get thermostat data: %w", err)
+	}
+	defer util.SafeClose(res.Body)
+
+	if res.StatusCode != 200 {
+		b, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("non-200 response: %d - %s", res.StatusCode, string(b))
+	}
+
+	var therm CarrierResponse
+	err = json.NewDecoder(res.Body).Decode(&therm)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	return &therm, nil
@@ -397,20 +407,31 @@ func (c *carrier) GetSummary(ctx context.Context) (*CarrierSummary, error) {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	params := CarrierParams{
+	uri, err = util.AddQueryParameters(uri, &CarrierParams{
 		Format:    "json",
 		JSON:      string(b),
 		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("bad query params: %w", err)
+	}
+
+	res, err := ctxhttp.Get(ctx, c.client, uri)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get thermostat data: %w", err)
+	}
+	defer util.SafeClose(res.Body)
+
+	if res.StatusCode != 200 {
+		b, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("non-200 response: %d - %s", res.StatusCode, string(b))
 	}
 
 	var summary CarrierSummary
-	_, err = ctxhttp.Get(ctxhttp.GetParams{
-		Ctx:         ctx,
-		HttpClient:  c.client,
-		URL:         uri,
-		Query:       &params,
-		Destination: &summary,
-	})
+	err = json.NewDecoder(res.Body).Decode(&summary)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
 	return &summary, err
 }
 
